@@ -13,10 +13,10 @@ const u32 gIntroFlygon_Gfx[] = INCBIN_U32("graphics/intro/scene_2/flygon.4bpp.lz
 const u32 gIntroBrendan_Gfx[] = INCBIN_U32("graphics/intro/scene_2/brendan.4bpp.lz");
 const u32 gIntroMay_Gfx[] = INCBIN_U32("graphics/intro/scene_2/may.4bpp.lz");
 
-const u32 gIntroGroudon_Gfx[] = INCBIN_U32("graphics/intro/scene_3/groudon.8bpp.lz");
+const u32 gIntroGroudon_Gfx[] = INCBIN_U32("build/assets/graphics/intro/scene_3/groudon.8bpp.lz");
 const u32 gIntroGroudon_Tilemap[] = INCBIN_U32("graphics/intro/scene_3/groudon.bin.lz");
 
-const u32 gIntroKyogre_Gfx[] = INCBIN_U32("graphics/intro/scene_3/kyogre.8bpp.lz");
+const u32 gIntroKyogre_Gfx[] = INCBIN_U32("build/assets/graphics/intro/scene_3/kyogre.8bpp.lz");
 const u32 gIntroKyogre_Tilemap[] = INCBIN_U32("graphics/intro/scene_3/kyogre.bin.lz");
 
 const u32 gIntroLegendBg_Gfx[] = INCBIN_U32("graphics/intro/scene_3/legend_bg.4bpp.lz"); // groudon/kyogre bg

@@ -623,7 +623,7 @@ static const u8 sSelectedMonLevelGenderCoords[3][2] =
 
 static const u16 sPokeball_Pal[] = INCBIN_U16("graphics/trade/pokeball.gbapal");
 static const u8 sPokeball_Gfx[] = INCBIN_U8("graphics/trade/pokeball.4bpp");
-static const u8 sPokeballSymbol_Gfx[] = INCBIN_U8("graphics/trade/pokeball_symbol.8bpp"); // unused
+static const u8 sPokeballSymbol_Gfx[] = INCBIN_U8("build/assets/graphics/trade/pokeball_symbol.8bpp"); // unused
 static const u16 sCableCloseup_Map[] = INCBIN_U16("graphics/trade/crossing_highlight_cable.bin");
 static const u16 sPokeballSymbol_Map[] = INCBIN_U16("graphics/trade/pokeball_symbol_map.bin"); // unused?
 static const u16 sUnusedPal1[] = INCBIN_U16("graphics/trade/unused1.gbapal");
@@ -636,7 +636,7 @@ static const u8 sLinkMonShadow_Gfx[] = INCBIN_U8("graphics/trade/link_mon_shadow
 static const u8 sCableEnd_Gfx[] = INCBIN_U8("graphics/trade/cable_end.4bpp");
 static const u8 sGbaScreen_Gfx[] = INCBIN_U8("graphics/trade/gba_screen.4bpp");
 const u16 gTradePlatform_Tilemap[] = INCBIN_U16("graphics/trade/platform.bin");
-static const u8 sGbaAffine_Gfx[] = INCBIN_U8("graphics/trade/gba_affine.8bpp"); // Only the gfx for when the GBA is zooming in/out
+static const u8 sGbaAffine_Gfx[] = INCBIN_U8("build/assets/graphics/trade/gba_affine.8bpp"); // Only the gfx for when the GBA is zooming in/out
 static const u8 sEmptyGfx[64] = {};
 static const u8 sGbaAffineMapCable[] = INCBIN_U8("graphics/trade/gba_affine_map_cable.bin");
 static const u8 sGbaAffineMapWireless[] = INCBIN_U8("graphics/trade/gba_affine_map_wireless.bin");

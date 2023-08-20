@@ -316,7 +316,8 @@ graphics/title_screen/pokemon_logo.gbapal: %.gbapal: %.pal
 graphics/pokemon_jump/bg.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 63 -Wnum_tiles
 
-graphics/pokenav/region_map/map.8bpp: %.8bpp: %.png
+$(ASSETS_OBJ_DIR)/graphics/pokenav/region_map/map.8bpp: graphics/pokenav/region_map/map.png
+	mkdir -p $(@D)
 	$(GFX) $< $@ -num_tiles 233 -Wnum_tiles
 
 $(MISCGFXDIR)/japanese_hof.4bpp: %.4bpp: %.png
@@ -426,7 +427,8 @@ $(TYPESGFXDIR)/move_types.gbapal: $(TYPESGFXDIR)/move_types_1.gbapal \
 graphics/bag/menu.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 53 -Wnum_tiles
 
-$(RAYQUAZAGFXDIR)/scene_2/rayquaza.8bpp: %.8bpp: %.png
+$(RAYQUAZA_OUTDIR)/scene_2/rayquaza.8bpp: $(RAYQUAZAGFXDIR)/scene_2/rayquaza.png
+	mkdir -p $(@D)
 	$(GFX) $< $@ -num_tiles 227 -Wnum_tiles
 
 $(RAYQUAZAGFXDIR)/scene_2/bg.4bpp: %.4bpp: %.png
@@ -681,10 +683,10 @@ $(PKNAVGFXDIR)/device_outline.4bpp: %.4bpp: %.png
 $(PKNAVGFXDIR)/match_call/ui.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 13 -Wnum_tiles
 
-$(POKEDEXGFXDIR)/region_map.8bpp: %.8bpp: %.png
+$(POKEDEX_OUTDIR)/region_map.8bpp: $(POKEDEXGFXDIR)/region_map.png
 	$(GFX) $< $@ -num_tiles 232 -Wnum_tiles
 
-$(POKEDEXGFXDIR)/region_map_affine.8bpp: %.8bpp: %.png
+$(POKEDEX_OUTDIR)/region_map_affine.8bpp: $(POKEDEXGFXDIR)/region_map_affine.png
 	$(GFX) $< $@ -num_tiles 233 -Wnum_tiles
 
 $(NAMINGGFXDIR)/cursor.4bpp: %.4bpp: %.png
