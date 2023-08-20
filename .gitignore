@@ -1,13 +1,30 @@
-*.exe
-*.o
-*.i
-*.elf
-*.gba
-!data/*.gba
+# OS
+.DS_Store
+Thumbs.db
+.fuse_hidden*
+
+# Tools
+.idea/
+.vscode/
+porymap.*.cfg
+
+# Emulation Files
 *.sgm
 *.sa1
 *.ss[0-9]
 *.sg1
+
+# Build artifacts
+build/
+tools/agbcc
+*.gba
+!data/*.gba
+*.elf
+*.o
+*.exe
+*.a
+*.i
+*.sym
 *.1bpp
 *.4bpp
 *.8bpp
@@ -19,23 +36,14 @@
 *.fwjpnfont
 sound/**/*.bin
 sound/songs/midi/*.s
-tools/agbcc
 *.map
-*.ld
-*.bat
 *.dump
+
+# Unknown/Other
 *.sa*
-Thumbs.db
-build/
-.DS_Store
-*.ddump
-.idea/
-porymap.*.cfg
-prefabs.json
-.vscode/
-*.a
-.fuse_hidden*
+*.bat
 *.sna
 *.diff
-*.sym
 *.js
+*.ddump
+prefabs.json
