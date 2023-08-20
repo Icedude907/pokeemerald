@@ -324,28 +324,45 @@ $(MISCGFXDIR)/japanese_hof.4bpp: %.4bpp: %.png
 
 # $(types:%=$(BATINTGFXDIR)/%.4bpp)
 # $(patsubst %,$(BATINTGFXDIR)/%.gbapal,textbox_0 textbox_1)
-$(BATINT_OUTDIR)/textbox.gbapal: $(patsubst %,$(BATINTGFXDIR)/textbox_%.gbapal,0 1)
+$(BATINTGFXDIR)/textbox.gbapal: $(BATINTGFXDIR)/textbox_0.gbapal \
+                                $(BATINTGFXDIR)/textbox_1.gbapal
 	@cat $^ >$@
 
-$(BTLANMSPR_OUTDIR)/ice_cube.4bpp: $(patsubst %,$(BTLANMSPRGFXDIR)/ice_cube_%.4bpp,0 1 2 3)
+$(BTLANMSPRGFXDIR)/ice_cube.4bpp: $(BTLANMSPRGFXDIR)/ice_cube_0.4bpp \
+                                  $(BTLANMSPRGFXDIR)/ice_cube_1.4bpp \
+                                  $(BTLANMSPRGFXDIR)/ice_cube_2.4bpp \
+                                  $(BTLANMSPRGFXDIR)/ice_cube_3.4bpp
 	@cat $^ >$@
 
-$(UNUSED_OUTDIR)/obi_palpak1.gbapal: $(patsubst %,$(UNUSEDGFXDIR)/old_pal%.gbapal,1 2 3)
+$(UNUSEDGFXDIR)/obi_palpak1.gbapal: $(UNUSEDGFXDIR)/old_pal1.gbapal \
+                                    $(UNUSEDGFXDIR)/old_pal2.gbapal \
+                                    $(UNUSEDGFXDIR)/old_pal3.gbapal
 	@cat $^ >$@
 
-$(UNUSED_OUTDIR)/obi_palpak3.gbapal: $(patsubst %,$(UNUSEDGFXDIR)/old_pal%.gbapal,5 6 7)
+$(UNUSEDGFXDIR)/obi_palpak3.gbapal: $(UNUSEDGFXDIR)/old_pal5.gbapal \
+                                    $(UNUSEDGFXDIR)/old_pal6.gbapal \
+                                    $(UNUSEDGFXDIR)/old_pal7.gbapal
 	@cat $^ >$@
 
-$(UNUSED_OUTDIR)/obi1.4bpp: $(patsubst %,$(UNUSEDGFXDIR)/%.4bpp,old_bulbasaur old_charizard)
+$(UNUSEDGFXDIR)/obi1.4bpp: $(UNUSEDGFXDIR)/old_bulbasaur.4bpp \
+                           $(UNUSEDGFXDIR)/old_charizard.4bpp
 	@cat $^ >$@
 
-$(UNUSED_OUTDIR)/obi2.4bpp: $(patsubst %,$(UNUSEDGFXDIR)/%.4bpp,old_bulbasaur2 old_battle_interface_1 old_battle_interface_2 old_battle_interface_3)
+$(UNUSEDGFXDIR)/obi2.4bpp: $(UNUSEDGFXDIR)/old_bulbasaur2.4bpp \
+                           $(UNUSEDGFXDIR)/old_battle_interface_1.4bpp \
+                           $(UNUSEDGFXDIR)/old_battle_interface_2.4bpp \
+                           $(UNUSEDGFXDIR)/old_battle_interface_3.4bpp
 	@cat $^ >$@
 
-$(BATINT_OUTDIR)/battle_bar.4bpp: $(patsubst %,$(BATINTGFXDIR)/%.4bpp,hpbar_anim_unused numbers1 numbers2)
+$(BATINTGFXDIR)/battle_bar.4bpp: $(BATINTGFXDIR)/hpbar_anim_unused.4bpp \
+                                 $(BATINTGFXDIR)/numbers1.4bpp \
+                                 $(BATINTGFXDIR)/numbers2.4bpp
 	@cat $^ >$@
 
-$(UNUSED_OUTDIR)/redyellowgreen_frame.bin: $(patsubst %,$(UNUSEDGFXDIR)/%.bin,yellow_frame green_frame blank_frame)
+$(UNUSEDGFXDIR)/redyellowgreen_frame.bin: $(UNUSEDGFXDIR)/red_frame.bin \
+                                          $(UNUSEDGFXDIR)/yellow_frame.bin \
+                                          $(UNUSEDGFXDIR)/green_frame.bin \
+                                          $(UNUSEDGFXDIR)/blank_frame.bin
 	@cat $^ >$@
 
 $(UNUSEDGFXDIR)/color_frames.4bpp: %.4bpp: %.png
@@ -354,8 +371,13 @@ $(UNUSEDGFXDIR)/color_frames.4bpp: %.4bpp: %.png
 $(BATINTGFXDIR)/unused_window2bar.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 5 -Wnum_tiles
 
-jpconstest_images := frame_1 floor frame_2 symbols meter letters numbers
-$(JPCONTESTGFXDIR)/composite_1.4bpp: $(jpconstest_images:%=$(JPCONTESTGFXDIR)/%.4bpp)
+$(JPCONTESTGFXDIR)/composite_1.4bpp: $(JPCONTESTGFXDIR)/frame_1.4bpp \
+                                     $(JPCONTESTGFXDIR)/floor.4bpp \
+                                     $(JPCONTESTGFXDIR)/frame_2.4bpp \
+                                     $(JPCONTESTGFXDIR)/symbols.4bpp \
+                                     $(JPCONTESTGFXDIR)/meter.4bpp \
+                                     $(JPCONTESTGFXDIR)/letters.4bpp \
+                                     $(JPCONTESTGFXDIR)/numbers.4bpp
 	@cat $^ >$@
 
 $(JPCONTESTGFXDIR)/composite_2.4bpp: $(JPCONTESTGFXDIR)/interface.4bpp \
@@ -674,14 +696,15 @@ $(NAMINGGFXDIR)/cursor_squished.4bpp: %.4bpp: %.png
 $(NAMINGGFXDIR)/cursor_filled.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 5 -Wnum_tiles
 
-$(SPINDAGFXDIR)/spot_0.1bpp: %.1bpp: %.png
+# Spinda is a pokemon with spots on it.
+$(SPINDA_OUTDIR)/spot_0.1bpp: $(SPINDAGFXDIR)/spot_0.png
 	$(GFX) $< $@ -plain -data_width 2
 
-$(SPINDAGFXDIR)/spot_1.1bpp: %.1bpp: %.png
+$(SPINDA_OUTDIR)/spot_1.1bpp: $(SPINDAGFXDIR)/spot_1.png
 	$(GFX) $< $@ -plain -data_width 2
 
-$(SPINDAGFXDIR)/spot_2.1bpp: %.1bpp: %.png
+$(SPINDA_OUTDIR)/spot_2.1bpp: $(SPINDAGFXDIR)/spot_2.png
 	$(GFX) $< $@ -plain -data_width 2
 
-$(SPINDAGFXDIR)/spot_3.1bpp: %.1bpp: %.png
+$(SPINDA_OUTDIR)/spot_3.1bpp: $(SPINDAGFXDIR)/spot_3.png
 	$(GFX) $< $@ -plain -data_width 2

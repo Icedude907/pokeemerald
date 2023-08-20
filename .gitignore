@@ -26,7 +26,6 @@ tools/agbcc
 *.a
 *.i
 *.sym
-*.1bpp
 *.4bpp
 *.8bpp
 *.gbapal

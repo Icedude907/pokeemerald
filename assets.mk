@@ -5,7 +5,9 @@
 %.pal: ;
 %.aif: ;
 
-%.1bpp: %.png
+# Off to the assets folder you go
+$(ASSETS_OBJ_DIR)/%.1bpp: %.png
+	mkdir -p $(@D)
 	$(GFX) $< $@
 %.4bpp: %.png
 	$(GFX) $< $@

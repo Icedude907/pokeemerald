@@ -214,7 +214,7 @@ ifeq ($(SCAN_DEPS),1)
   $(shell mkdir -p $(SUBDIRS))
 endif
 
-# Stub?
+# Stub for `json_data_rules.mk`
 AUTO_GEN_TARGETS :=
 
 # Make rules
@@ -248,8 +248,8 @@ clean: tidy clean-assets
 clean-assets:
 	rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
 	rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
-	rm -rf $(ASSETS_OBJ_DIR)
 	rm -f $(AUTO_GEN_TARGETS)
+	-rm -rf $(ASSETS_OBJ_DIR)
 	find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' \) -exec rm {} +
 	find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
