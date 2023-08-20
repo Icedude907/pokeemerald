@@ -21,7 +21,7 @@ JPCONTESTGFXDIR := graphics/contest/japanese
 POKEDEXGFXDIR := graphics/pokedex
 STARTERGFXDIR := graphics/starter_choose
 NAMINGGFXDIR := graphics/naming_screen
-SPINDAGFXDIR := graphics/spinda_spots
+SPINDAGFXDIR := graphics/pokemon/spinda/spots
 
 types := normal fight flying poison ground rock bug ghost steel mystery fire water grass electric psychic ice dragon dark
 contest_types := cool beauty cute smart tough
@@ -696,15 +696,6 @@ $(NAMINGGFXDIR)/cursor_squished.4bpp: %.4bpp: %.png
 $(NAMINGGFXDIR)/cursor_filled.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 5 -Wnum_tiles
 
-# Spinda is a pokemon with spots on it.
-$(SPINDA_OUTDIR)/spot_0.1bpp: $(SPINDAGFXDIR)/spot_0.png
-	$(GFX) $< $@ -plain -data_width 2
-
-$(SPINDA_OUTDIR)/spot_1.1bpp: $(SPINDAGFXDIR)/spot_1.png
-	$(GFX) $< $@ -plain -data_width 2
-
-$(SPINDA_OUTDIR)/spot_2.1bpp: $(SPINDAGFXDIR)/spot_2.png
-	$(GFX) $< $@ -plain -data_width 2
-
-$(SPINDA_OUTDIR)/spot_3.1bpp: $(SPINDAGFXDIR)/spot_3.png
+# Spinda to win-da (TODO: Maybe these should have optional config files rather than rules?)
+$(SPINDA_OUTDIR)/%.1bpp: $(SPINDAGFXDIR)/%.png
 	$(GFX) $< $@ -plain -data_width 2
