@@ -246,9 +246,6 @@ clean: tidy clean-assets
 	@$(MAKE) clean -C libagbsyscall
 
 clean-assets:
-	rm -f $(SAMPLE_SUBDIR)/*.bin
-	rm -f $(CRY_SUBDIR)/*.bin
-	rm -f $(MID_SUBDIR)/*.s
 	rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
 	rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
 	rm -rf $(ASSETS_OBJ_DIR)
@@ -270,7 +267,7 @@ include graphics_file_rules.mk
 include map_data_rules.mk
 include spritesheet_rules.mk
 include json_data_rules.mk
-include songs.mk
+include audio.mk
 include assets.mk
 
 # Modify build flags for some files.
@@ -385,10 +382,6 @@ else
 $(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o, $(src)),$(src))))
 endif
 endif
-
-# Song compilation
-$(SONG_BUILDDIR)/%.o: $(SONG_SUBDIR)/%.s
-	$(AS) $(ASFLAGS) -I sound -o $@ $<
 
 # Linker script generation
 $(OBJ_DIR)/sym_bss.ld: sym_bss.txt

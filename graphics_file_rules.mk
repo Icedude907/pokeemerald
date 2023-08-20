@@ -75,6 +75,8 @@ $(CASTFORM_OUTDIR)/shiny.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/shiny.gbapal,$
 
 
 ### Tilesets ###
+# TODO: Testing
+# $(TILESETGFXDIR)/secondary/petalburg/tiles.4bpp: $(TILESET_OUTDIR)/%.4bpp: $(TILESETGFXDIR)/%.png
 $(TILESETGFXDIR)/secondary/petalburg/tiles.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 159 -Wnum_tiles
 
@@ -320,45 +322,30 @@ graphics/pokenav/region_map/map.8bpp: %.8bpp: %.png
 $(MISCGFXDIR)/japanese_hof.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 29 -Wnum_tiles
 
-$(BATINTGFXDIR)/textbox.gbapal: $(BATINTGFXDIR)/textbox_0.gbapal \
-                                $(BATINTGFXDIR)/textbox_1.gbapal
+# $(types:%=$(BATINTGFXDIR)/%.4bpp)
+# $(patsubst %,$(BATINTGFXDIR)/%.gbapal,textbox_0 textbox_1)
+$(BATINT_OUTDIR)/textbox.gbapal: $(patsubst %,$(BATINTGFXDIR)/textbox_%.gbapal,0 1)
 	@cat $^ >$@
 
-$(BTLANMSPRGFXDIR)/ice_cube.4bpp: $(BTLANMSPRGFXDIR)/ice_cube_0.4bpp \
-                                  $(BTLANMSPRGFXDIR)/ice_cube_1.4bpp \
-                                  $(BTLANMSPRGFXDIR)/ice_cube_2.4bpp \
-                                  $(BTLANMSPRGFXDIR)/ice_cube_3.4bpp
+$(BTLANMSPR_OUTDIR)/ice_cube.4bpp: $(patsubst %,$(BTLANMSPRGFXDIR)/ice_cube_%.4bpp,0 1 2 3)
 	@cat $^ >$@
 
-$(UNUSEDGFXDIR)/obi_palpak1.gbapal: $(UNUSEDGFXDIR)/old_pal1.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal2.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal3.gbapal
+$(UNUSED_OUTDIR)/obi_palpak1.gbapal: $(patsubst %,$(UNUSEDGFXDIR)/old_pal%.gbapal,1 2 3)
 	@cat $^ >$@
 
-$(UNUSEDGFXDIR)/obi_palpak3.gbapal: $(UNUSEDGFXDIR)/old_pal5.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal6.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal7.gbapal
+$(UNUSED_OUTDIR)/obi_palpak3.gbapal: $(patsubst %,$(UNUSEDGFXDIR)/old_pal%.gbapal,5 6 7)
 	@cat $^ >$@
 
-$(UNUSEDGFXDIR)/obi1.4bpp: $(UNUSEDGFXDIR)/old_bulbasaur.4bpp \
-                           $(UNUSEDGFXDIR)/old_charizard.4bpp
+$(UNUSED_OUTDIR)/obi1.4bpp: $(patsubst %,$(UNUSEDGFXDIR)/%.4bpp,old_bulbasaur old_charizard)
 	@cat $^ >$@
 
-$(UNUSEDGFXDIR)/obi2.4bpp: $(UNUSEDGFXDIR)/old_bulbasaur2.4bpp \
-                           $(UNUSEDGFXDIR)/old_battle_interface_1.4bpp \
-                           $(UNUSEDGFXDIR)/old_battle_interface_2.4bpp \
-                           $(UNUSEDGFXDIR)/old_battle_interface_3.4bpp
+$(UNUSED_OUTDIR)/obi2.4bpp: $(patsubst %,$(UNUSEDGFXDIR)/%.4bpp,old_bulbasaur2 old_battle_interface_1 old_battle_interface_2 old_battle_interface_3)
 	@cat $^ >$@
 
-$(BATINTGFXDIR)/battle_bar.4bpp: $(BATINTGFXDIR)/hpbar_anim_unused.4bpp \
-                                 $(BATINTGFXDIR)/numbers1.4bpp \
-                                 $(BATINTGFXDIR)/numbers2.4bpp
+$(BATINT_OUTDIR)/battle_bar.4bpp: $(patsubst %,$(BATINTGFXDIR)/%.4bpp,hpbar_anim_unused numbers1 numbers2)
 	@cat $^ >$@
 
-$(UNUSEDGFXDIR)/redyellowgreen_frame.bin: $(UNUSEDGFXDIR)/red_frame.bin \
-                                          $(UNUSEDGFXDIR)/yellow_frame.bin \
-                                          $(UNUSEDGFXDIR)/green_frame.bin \
-                                          $(UNUSEDGFXDIR)/blank_frame.bin
+$(UNUSED_OUTDIR)/redyellowgreen_frame.bin: $(patsubst %,$(UNUSEDGFXDIR)/%.bin,yellow_frame green_frame blank_frame)
 	@cat $^ >$@
 
 $(UNUSEDGFXDIR)/color_frames.4bpp: %.4bpp: %.png
@@ -367,13 +354,8 @@ $(UNUSEDGFXDIR)/color_frames.4bpp: %.4bpp: %.png
 $(BATINTGFXDIR)/unused_window2bar.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 5 -Wnum_tiles
 
-$(JPCONTESTGFXDIR)/composite_1.4bpp: $(JPCONTESTGFXDIR)/frame_1.4bpp \
-                                     $(JPCONTESTGFXDIR)/floor.4bpp \
-                                     $(JPCONTESTGFXDIR)/frame_2.4bpp \
-                                     $(JPCONTESTGFXDIR)/symbols.4bpp \
-                                     $(JPCONTESTGFXDIR)/meter.4bpp \
-                                     $(JPCONTESTGFXDIR)/letters.4bpp \
-                                     $(JPCONTESTGFXDIR)/numbers.4bpp
+jpconstest_images := frame_1 floor frame_2 symbols meter letters numbers
+$(JPCONTESTGFXDIR)/composite_1.4bpp: $(jpconstest_images:%=$(JPCONTESTGFXDIR)/%.4bpp)
 	@cat $^ >$@
 
 $(JPCONTESTGFXDIR)/composite_2.4bpp: $(JPCONTESTGFXDIR)/interface.4bpp \

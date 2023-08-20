@@ -13,6 +13,7 @@ porymap.*.cfg
 *.sa1
 *.ss[0-9]
 *.sg1
+*.sa*
 
 # Build artifacts
 build/
@@ -31,13 +32,10 @@ tools/agbcc
 *.gbapal
 *.lz
 *.rl
-sound/**/*.bin
-sound/songs/midi/*.s
 *.map
 *.dump
 
 # Unknown/Other
-*.sa*
 *.bat
 *.sna
 *.diff
