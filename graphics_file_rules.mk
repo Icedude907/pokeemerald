@@ -26,44 +26,55 @@ SPINDAGFXDIR := graphics/spinda_spots
 types := normal fight flying poison ground rock bug ghost steel mystery fire water grass electric psychic ice dragon dark
 contest_types := cool beauty cute smart tough
 
+# Output folders
+CASTFORM_OUTDIR     := $(ASSETS_OBJ_DIR)/$(CASTFORMGFXDIR)
+TILESET_OUTDIR      := $(ASSETS_OBJ_DIR)/$(TILESETGFXDIR)
+FONT_OUTDIR         := $(ASSETS_OBJ_DIR)/$(FONTGFXDIR)
+INTERFACE_OUTDIR    := $(ASSETS_OBJ_DIR)/$(INTERFACEGFXDIR)
+BTLANMSPR_OUTDIR    := $(ASSETS_OBJ_DIR)/$(BTLANMSPRGFXDIR)
+UNUSED_OUTDIR       := $(ASSETS_OBJ_DIR)/$(UNUSEDGFXDIR)
+UNKNOWN_OUTDIR      := $(ASSETS_OBJ_DIR)/$(UNKNOWNGFXDIR)
+BATINT_OUTDIR       := $(ASSETS_OBJ_DIR)/$(BATINTGFXDIR)
+MASKS_OUTDIR        := $(ASSETS_OBJ_DIR)/$(MASKSGFXDIR)
+BATTRANS_OUTDIR     := $(ASSETS_OBJ_DIR)/$(BATTRANSGFXDIR)
+TYPES_OUTDIR        := $(ASSETS_OBJ_DIR)/$(TYPESGFXDIR)
+RAYQUAZA_OUTDIR     := $(ASSETS_OBJ_DIR)/$(RAYQUAZAGFXDIR)
+ROULETTE_OUTDIR     := $(ASSETS_OBJ_DIR)/$(ROULETTEGFXDIR)
+SLOTMACHINE_OUTDIR  := $(ASSETS_OBJ_DIR)/$(SLOTMACHINEGFXDIR)
+PKNAV_OUTDIR        := $(ASSETS_OBJ_DIR)/$(PKNAVGFXDIR)
+PKNAVOPTIONS_OUTDIR := $(ASSETS_OBJ_DIR)/$(PKNAVOPTIONSGFXDIR)
+WALLPAPER_OUTDIR    := $(ASSETS_OBJ_DIR)/$(WALLPAPERGFXDIR)
+OBJEVENT_OUTDIR     := $(ASSETS_OBJ_DIR)/$(OBJEVENTGFXDIR)
+MISC_OUTDIR         := $(ASSETS_OBJ_DIR)/$(MISCGFXDIR)
+JPCONTEST_OUTDIR    := $(ASSETS_OBJ_DIR)/$(JPCONTESTGFXDIR)
+POKEDEX_OUTDIR      := $(ASSETS_OBJ_DIR)/$(POKEDEXGFXDIR)
+STARTER_OUTDIR      := $(ASSETS_OBJ_DIR)/$(STARTERGFXDIR)
+NAMING_OUTDIR       := $(ASSETS_OBJ_DIR)/$(NAMINGGFXDIR)
+SPINDA_OUTDIR       := $(ASSETS_OBJ_DIR)/$(SPINDAGFXDIR)
 
+# TEMP TODO: A nicer way to create the directory tree
+SPECIAL_OUTDIRS := $(CASTFORM_OUTDIR) $(TILESET_OUTDIR) $(FONT_OUTDIR) $(INTERFACE_OUTDIR) $(BTLANMSPR_OUTDIR) $(UNUSED_OUTDIR) $(UNKNOWN_OUTDIR) $(BATINT_OUTDIR) $(MASKS_OUTDIR) $(BATTRANS_OUTDIR) $(TYPES_OUTDIR) $(RAYQUAZA_OUTDIR) $(ROULETTE_OUTDIR) $(SLOTMACHINE_OUTDIR) $(PKNAV_OUTDIR) $(PKNAVOPTIONS_OUTDIR) $(WALLPAPER_OUTDIR) $(OBJEVENT_OUTDIR) $(MISC_OUTDIR) $(JPCONTEST_OUTDIR) $(POKEDEX_OUTDIR) $(STARTER_OUTDIR) $(NAMING_OUTDIR) $(SPINDA_OUTDIR) 
+$(shell mkdir -p $(SPECIAL_OUTDIRS))
 
-### Castform ###
-
-$(CASTFORMGFXDIR)/front.4bpp: $(CASTFORMGFXDIR)/normal/front.4bpp \
-                              $(CASTFORMGFXDIR)/sunny/front.4bpp \
-                              $(CASTFORMGFXDIR)/rainy/front.4bpp \
-                              $(CASTFORMGFXDIR)/snowy/front.4bpp
+### Castform has all 4 of its forms joined together before compression
+castform_types := normal sunny rainy snowy
+$(CASTFORM_OUTDIR)/front.4bpp: $(patsubst %,$(CASTFORMGFXDIR)/%/front.4bpp,$(castform_types))
 	@cat $^ >$@
 
-$(CASTFORMGFXDIR)/back.4bpp: $(CASTFORMGFXDIR)/normal/back.4bpp \
-                             $(CASTFORMGFXDIR)/sunny/back.4bpp \
-                             $(CASTFORMGFXDIR)/rainy/back.4bpp \
-                             $(CASTFORMGFXDIR)/snowy/back.4bpp
+$(CASTFORM_OUTDIR)/back.4bpp: $(patsubst %,$(CASTFORMGFXDIR)/%/back.4bpp,$(castform_types))
 	@cat $^ >$@
 
-$(CASTFORMGFXDIR)/anim_front.4bpp: $(CASTFORMGFXDIR)/normal/anim_front.4bpp \
-                                   $(CASTFORMGFXDIR)/sunny/anim_front.4bpp \
-                                   $(CASTFORMGFXDIR)/rainy/anim_front.4bpp \
-                                   $(CASTFORMGFXDIR)/snowy/anim_front.4bpp
+$(CASTFORM_OUTDIR)/anim_front.4bpp: $(patsubst %,$(CASTFORMGFXDIR)/%/anim_front.4bpp,$(castform_types))
 	@cat $^ >$@
 
-$(CASTFORMGFXDIR)/normal.gbapal: $(CASTFORMGFXDIR)/normal/normal.gbapal \
-                                 $(CASTFORMGFXDIR)/sunny/normal.gbapal \
-                                 $(CASTFORMGFXDIR)/rainy/normal.gbapal \
-                                 $(CASTFORMGFXDIR)/snowy/normal.gbapal
+$(CASTFORM_OUTDIR)/normal.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/normal.gbapal,$(castform_types))
 	@cat $^ >$@
 
-$(CASTFORMGFXDIR)/shiny.gbapal: $(CASTFORMGFXDIR)/normal/shiny.gbapal \
-                                $(CASTFORMGFXDIR)/sunny/shiny.gbapal \
-                                $(CASTFORMGFXDIR)/rainy/shiny.gbapal \
-                                $(CASTFORMGFXDIR)/snowy/shiny.gbapal
+$(CASTFORM_OUTDIR)/shiny.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/shiny.gbapal,$(castform_types))
 	@cat $^ >$@
-
 
 
 ### Tilesets ###
-
 $(TILESETGFXDIR)/secondary/petalburg/tiles.4bpp: %.4bpp: %.png
 	$(GFX) $< $@ -num_tiles 159 -Wnum_tiles
 
@@ -259,41 +270,40 @@ $(TILESETGFXDIR)/secondary/mystery_events_house/tiles.4bpp: %.4bpp: %.png
 
 
 ### Fonts ###
-
-$(FONTGFXDIR)/small.latfont: $(FONTGFXDIR)/latin_small.png
+$(FONT_OUTDIR)/small.latfont: $(FONTGFXDIR)/latin_small.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/normal.latfont: $(FONTGFXDIR)/latin_normal.png
+$(FONT_OUTDIR)/normal.latfont: $(FONTGFXDIR)/latin_normal.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/short.latfont: $(FONTGFXDIR)/latin_short.png
+$(FONT_OUTDIR)/short.latfont: $(FONTGFXDIR)/latin_short.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/narrow.latfont: $(FONTGFXDIR)/latin_narrow.png
+$(FONT_OUTDIR)/narrow.latfont: $(FONTGFXDIR)/latin_narrow.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/small_narrow.latfont: $(FONTGFXDIR)/latin_small_narrow.png
+$(FONT_OUTDIR)/small_narrow.latfont: $(FONTGFXDIR)/latin_small_narrow.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/small.hwjpnfont: $(FONTGFXDIR)/japanese_small.png
+$(FONT_OUTDIR)/small.hwjpnfont: $(FONTGFXDIR)/japanese_small.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/normal.hwjpnfont: $(FONTGFXDIR)/japanese_normal.png
+$(FONT_OUTDIR)/normal.hwjpnfont: $(FONTGFXDIR)/japanese_normal.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/bold.hwjpnfont: $(FONTGFXDIR)/japanese_bold.png
+$(FONT_OUTDIR)/bold.hwjpnfont: $(FONTGFXDIR)/japanese_bold.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/short.fwjpnfont: $(FONTGFXDIR)/japanese_short.png
+$(FONT_OUTDIR)/short.fwjpnfont: $(FONTGFXDIR)/japanese_short.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/braille.fwjpnfont: $(FONTGFXDIR)/braille.png
+$(FONT_OUTDIR)/braille.fwjpnfont: $(FONTGFXDIR)/braille.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/frlg_male.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_male_font.png
+$(FONT_OUTDIR)/frlg_male.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_male_font.png
 	$(GFX) $< $@
 
-$(FONTGFXDIR)/frlg_female.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_female_font.png
+$(FONT_OUTDIR)/frlg_female.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_female_font.png
 	$(GFX) $< $@
 
 

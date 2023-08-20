@@ -1,3 +1,5 @@
+#include "global.h"
+
 const u32 gMonStillFrontPic_Bulbasaur[] = INCBIN_U32("graphics/pokemon/bulbasaur/front.4bpp.lz");
 const u32 gMonPalette_Bulbasaur[] = INCBIN_U32("graphics/pokemon/bulbasaur/normal.gbapal.lz");
 const u32 gMonBackPic_Bulbasaur[] = INCBIN_U32("graphics/pokemon/bulbasaur/back.4bpp.lz");
@@ -2515,10 +2517,10 @@ const u32 gMonShinyPalette_Aggron[] = INCBIN_U32("graphics/pokemon/aggron/shiny.
 const u8 gMonIcon_Aggron[] = INCBIN_U8("graphics/pokemon/aggron/icon.4bpp");
 const u8 gMonFootprint_Aggron[] = INCBIN_U8("graphics/pokemon/aggron/footprint.1bpp");
 
-const u32 gMonStillFrontPic_Castform[] = INCBIN_U32("graphics/pokemon/castform/front.4bpp.lz");
-const u32 gMonPalette_Castform[] = INCBIN_U32("graphics/pokemon/castform/normal.gbapal.lz");
-const u32 gMonBackPic_Castform[] = INCBIN_U32("graphics/pokemon/castform/back.4bpp.lz");
-const u32 gMonShinyPalette_Castform[] = INCBIN_U32("graphics/pokemon/castform/shiny.gbapal.lz");
+const u32 gMonStillFrontPic_Castform[] = INCBIN_U32("build/assets/graphics/pokemon/castform/front.4bpp.lz");
+const u32 gMonPalette_Castform[] = INCBIN_U32("build/assets/graphics/pokemon/castform/normal.gbapal.lz");
+const u32 gMonBackPic_Castform[] = INCBIN_U32("build/assets/graphics/pokemon/castform/back.4bpp.lz");
+const u32 gMonShinyPalette_Castform[] = INCBIN_U32("build/assets/graphics/pokemon/castform/shiny.gbapal.lz");
 const u8 gMonIcon_Castform[] = INCBIN_U8("graphics/pokemon/castform/icon.4bpp");
 const u8 gMonFootprint_Castform[] = INCBIN_U8("graphics/pokemon/castform/footprint.1bpp");
 

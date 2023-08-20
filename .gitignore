@@ -31,9 +31,6 @@ tools/agbcc
 *.gbapal
 *.lz
 *.rl
-*.latfont
-*.hwjpnfont
-*.fwjpnfont
 sound/**/*.bin
 sound/songs/midi/*.s
 *.map

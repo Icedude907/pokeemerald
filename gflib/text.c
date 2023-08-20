@@ -234,7 +234,7 @@ static const u8 sMenuCursorDimensions[][2] =
     [FONT_BOLD]         = {}
 };
 
-static const u16 sFontBoldJapaneseGlyphs[] = INCBIN_U16("graphics/fonts/bold.hwjpnfont");
+static const u16 sFontBoldJapaneseGlyphs[] = INCBIN_U16("build/assets/graphics/fonts/bold.hwjpnfont");
 
 static void SetFontsPointer(const struct FontInfo *fonts)
 {

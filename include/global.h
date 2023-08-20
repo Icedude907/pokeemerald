@@ -37,6 +37,10 @@
 #define INCBIN_S32  INCBIN
 #endif // IDE support
 
+// Compiled assets are placed here
+// TODO: Macro expansion in INCBIN
+#define ASSETS_DIR "build/assets/"
+
 #define ARRAY_COUNT(array) (size_t)(sizeof(array) / sizeof((array)[0]))
 
 // GameFreak used a macro called "NELEMS", as evidenced by

@@ -11,13 +11,8 @@ FILE_NAME := pokeemerald
 
 # Builds the ROM using a modern compiler
 MODERN      ?= 0
-# Compares the final ROM to a checksum of the original - must use the legacy compiler
-COMPARE     ?= 0
 ifeq (modern,$(MAKECMDGOALS))
   MODERN := 1
-endif
-ifeq (compare,$(MAKECMDGOALS))
-  COMPARE := 1
 endif
 
 
@@ -72,7 +67,7 @@ MODERN_ROM_NAME := $(FILE_NAME)_modern.gba
 MODERN_OBJ_DIR_NAME := build/modern
 
 # Shared dir for asset files, (not finalised .o files).
-ASSET_OBJ_DIR := build/assets
+ASSETS_OBJ_DIR := build/assets
 
 # Pick our chosen variables
 ifeq ($(MODERN),0)
@@ -157,8 +152,6 @@ MAKEFLAGS += --no-print-directory
 # Secondary expansion is required for dependency variables in object rules.
 .SECONDEXPANSION:
 
-.PHONY: all rom clean compare tidy tools mostlyclean clean-tools $(TOOLDIRS) libagbsyscall modern tidymodern tidynonmodern
-
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
 # Optimise dependency checking
@@ -217,13 +210,16 @@ ifeq ($(SCAN_DEPS),1)
   OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
   SUBDIRS  := $(sort $(dir $(OBJS)))
+  # $(info ) good idea
   $(shell mkdir -p $(SUBDIRS))
 endif
 
 # Stub?
 AUTO_GEN_TARGETS :=
 
-# Normal make rules
+# Make rules
+.PHONY: all rom modern compare clean-all clean-tools clean clean-assets tidy tidymodern tidynonmodern tools $(TOOLDIRS) libagbsyscall
+
 all: rom
 modern: all
 compare: all
@@ -246,17 +242,18 @@ clean-all: clean clean-tools
 clean-tools:
 	@$(foreach tooldir,$(TOOLDIRS),$(MAKE) clean -C $(tooldir);)
 
-clean: tidy cleanassets
+clean: tidy clean-assets
 	@$(MAKE) clean -C libagbsyscall
 
-cleanassets:
+clean-assets:
 	rm -f $(SAMPLE_SUBDIR)/*.bin
 	rm -f $(CRY_SUBDIR)/*.bin
 	rm -f $(MID_SUBDIR)/*.s
 	rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
 	rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
+	rm -rf $(ASSETS_OBJ_DIR)
 	rm -f $(AUTO_GEN_TARGETS)
-	find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' -o -iname '*.latfont' -o -iname '*.hwjpnfont' -o -iname '*.fwjpnfont' \) -exec rm {} +
+	find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' \) -exec rm {} +
 	find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
 tidy: tidynonmodern tidymodern
