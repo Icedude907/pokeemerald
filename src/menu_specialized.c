@@ -1117,7 +1117,7 @@ bool8 ConditionMenu_UpdateMonExit(struct ConditionGraph *graph, s16 *x)
 
 static const u32 sConditionPokeball_Gfx[] = INCBIN_U32("build/assets/graphics/pokenav/condition/pokeball.4bpp");
 static const u32 sConditionPokeballPlaceholder_Gfx[] = INCBIN_U32("build/assets/graphics/pokenav/condition/pokeball_placeholder.4bpp");
-static const u16 sConditionSparkle_Gfx[] = INCBIN_U16("graphics/pokenav/condition/sparkle.gbapal");
+static const u16 sConditionSparkle_Gfx[] = INCBIN_U16("build/assets/graphics/pokenav/condition/sparkle.gbapal");
 static const u32 sConditionSparkle_Pal[] = INCBIN_U32("build/assets/graphics/pokenav/condition/sparkle.4bpp");
 
 static const struct OamData sOam_ConditionMonPic =

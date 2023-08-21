@@ -16,10 +16,12 @@ $(ASSETS_OBJ_DIR)/%.4bpp: %.png
 $(ASSETS_OBJ_DIR)/%.8bpp: %.png
 	@mkdir -p $(@D)
 	$(GFX) $< $@
-%.gbapal: %.pal
+$(ASSETS_OBJ_DIR)/%.gbapal: %.pal
+	@mkdir -p $(@D)
 	$(GFX) $< $@
 # Derives the palette from the image in the absence of a .pal file
-%.gbapal: %.png
+$(ASSETS_OBJ_DIR)/%.gbapal: %.png
+	@mkdir -p $(@D)
 	$(GFX) $< $@
 
 # These rules are cool. Because make can extract linked files from your source code,

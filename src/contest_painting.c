@@ -69,7 +69,7 @@ extern const u8 gContestPaintingTough1[];
 extern const u8 gContestPaintingTough2[];
 extern const u8 gContestPaintingTough3[];
 
-static const u16 sPictureFramePalettes[]         = INCBIN_U16("graphics/picture_frame/bg.gbapal");
+static const u16 sPictureFramePalettes[]         = INCBIN_U16("build/assets/graphics/picture_frame/bg.gbapal");
 static const u8 sPictureFrameTiles_Cool[]        = INCBIN_U8("build/assets/graphics/picture_frame/cool.4bpp.rl");
 static const u8 sPictureFrameTiles_Beauty[]      = INCBIN_U8("build/assets/graphics/picture_frame/beauty.4bpp.rl");
 static const u8 sPictureFrameTiles_Cute[]        = INCBIN_U8("build/assets/graphics/picture_frame/cute.4bpp.rl");

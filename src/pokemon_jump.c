@@ -2366,8 +2366,8 @@ void IsPokemonJumpSpeciesInParty(void)
     gSpecialVar_Result = FALSE;
 }
 
-static const u16 sPokeJumpPal1[] = INCBIN_U16("graphics/pokemon_jump/pal1.gbapal");
-static const u16 sPokeJumpPal2[] = INCBIN_U16("graphics/pokemon_jump/pal2.gbapal");
+static const u16 sPokeJumpPal1[] = INCBIN_U16("build/assets/graphics/pokemon_jump/pal1.gbapal");
+static const u16 sPokeJumpPal2[] = INCBIN_U16("build/assets/graphics/pokemon_jump/pal2.gbapal");
 
 static const u32 sVine1_Gfx[] = INCBIN_U32("build/assets/graphics/pokemon_jump/vine1.4bpp.lz");
 static const u32 sVine2_Gfx[] = INCBIN_U32("build/assets/graphics/pokemon_jump/vine2.4bpp.lz");
@@ -3043,17 +3043,17 @@ static void InitPokeJumpGfx(struct PokemonJumpGfx *jumpGfx)
     jumpGfx->msgWindowId = WINDOW_NONE;
 }
 
-static const u16 sInterface_Pal[] = INCBIN_U16("graphics/pokemon_jump/interface.gbapal");
+static const u16 sInterface_Pal[] = INCBIN_U16("build/assets/graphics/pokemon_jump/interface.gbapal");
 
-static const u16 sBg_Pal[] = INCBIN_U16("graphics/pokemon_jump/bg.gbapal");
+static const u16 sBg_Pal[] = INCBIN_U16("build/assets/graphics/pokemon_jump/bg.gbapal");
 static const u32 sBg_Gfx[] = INCBIN_U32("build/assets/graphics/pokemon_jump/bg.4bpp.lz");
 static const u32 sBg_Tilemap[] = INCBIN_U32("graphics/pokemon_jump/bg.bin.lz");
 
-static const u16 sVenusaur_Pal[] = INCBIN_U16("graphics/pokemon_jump/venusaur.gbapal");
+static const u16 sVenusaur_Pal[] = INCBIN_U16("build/assets/graphics/pokemon_jump/venusaur.gbapal");
 static const u32 sVenusaur_Gfx[] = INCBIN_U32("build/assets/graphics/pokemon_jump/venusaur.4bpp.lz");
 static const u32 sVenusaur_Tilemap[] = INCBIN_U32("graphics/pokemon_jump/venusaur.bin.lz");
 
-static const u16 sBonuses_Pal[] = INCBIN_U16("graphics/pokemon_jump/bonuses.gbapal");
+static const u16 sBonuses_Pal[] = INCBIN_U16("build/assets/graphics/pokemon_jump/bonuses.gbapal");
 static const u32 sBonuses_Gfx[] = INCBIN_U32("build/assets/graphics/pokemon_jump/bonuses.4bpp.lz");
 static const u32 sBonuses_Tilemap[] = INCBIN_U32("graphics/pokemon_jump/bonuses.bin.lz");
 

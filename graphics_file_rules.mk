@@ -70,10 +70,10 @@ $(CASTFORM_OUTDIR)/anim_front.4bpp: $(patsubst %,$(CASTFORM_OUTDIR)/%/anim_front
 	cat $^ >$@
 
 # TODO: Remember to replace these lines.
-$(CASTFORM_OUTDIR)/normal.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/normal.gbapal,$(castform_types))
+$(CASTFORM_OUTDIR)/normal.gbapal: $(patsubst %,$(CASTFORM_OUTDIR)/%/normal.gbapal,$(castform_types))
 	cat $^ >$@
 
-$(CASTFORM_OUTDIR)/shiny.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/shiny.gbapal,$(castform_types))
+$(CASTFORM_OUTDIR)/shiny.gbapal: $(patsubst %,$(CASTFORM_OUTDIR)/%/shiny.gbapal,$(castform_types))
 	cat $^ >$@
 
 ### Tilesets
@@ -371,14 +371,10 @@ $(FONT_OUTDIR)/frlg_female.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_female_font.pn
 	$(GFX) $< $@
 
 ### Unused Graphics
-$(UNUSEDGFXDIR)/obi_palpak1.gbapal: $(UNUSEDGFXDIR)/old_pal1.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal2.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal3.gbapal
+$(UNUSED_OUTDIR)/obi_palpak1.gbapal: $(patsubst %,$(UNUSED_OUTDIR)/old_pal%.gbapal,1 2 3)
 	cat $^ >$@
 
-$(UNUSEDGFXDIR)/obi_palpak3.gbapal: $(UNUSEDGFXDIR)/old_pal5.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal6.gbapal \
-                                    $(UNUSEDGFXDIR)/old_pal7.gbapal
+$(UNUSED_OUTDIR)/obi_palpak3.gbapal: $(patsubst %,$(UNUSED_OUTDIR)/old_pal%.gbapal,5 6 7)
 	cat $^ >$@
 
 $(UNUSED_OUTDIR)/obi1.4bpp: $(UNUSED_OUTDIR)/old_bulbasaur.4bpp \
@@ -394,10 +390,8 @@ $(UNUSED_OUTDIR)/obi2.4bpp: $(UNUSED_OUTDIR)/old_bulbasaur2.4bpp \
 $(UNUSED_OUTDIR)/color_frames.4bpp: $(UNUSEDGFXDIR)/color_frames.png
 	$(GFX) $< $@ -num_tiles 353 -Wnum_tiles
 
-$(UNUSEDGFXDIR)/redyellowgreen_frame.bin: $(UNUSEDGFXDIR)/red_frame.bin \
-                                          $(UNUSEDGFXDIR)/yellow_frame.bin \
-                                          $(UNUSEDGFXDIR)/green_frame.bin \
-                                          $(UNUSEDGFXDIR)/blank_frame.bin
+unused_frames := red_frame yellow_frame green_frame blank_frame
+$(UNUSED_OUTDIR)/redyellowgreen_frame.bin: $(patsubst %,$(UNUSEDGFXDIR)/%.bin,$(unused_frames))
 	cat $^ >$@
 
 ### Battle transitions
@@ -431,8 +425,8 @@ $(BATTRANS_OUTDIR)/frontier_square_4.4bpp: $(BATTRANS_OUTDIR)/frontier_squares_b
 	cat $^ >$@
 
 ### Battle Interface
-$(BATINTGFXDIR)/textbox.gbapal: $(BATINTGFXDIR)/textbox_0.gbapal \
-                                $(BATINTGFXDIR)/textbox_1.gbapal
+$(BATINT_OUTDIR)/textbox.gbapal: $(BATINT_OUTDIR)/textbox_0.gbapal \
+                                $(BATINT_OUTDIR)/textbox_1.gbapal
 	cat $^ >$@
 
 $(BATINT_OUTDIR)/battle_bar.4bpp: $(BATINT_OUTDIR)/hpbar_anim_unused.4bpp \
@@ -524,16 +518,17 @@ $(SLOTMACHINE_OUTDIR)/reel_time_gfx.4bpp: $(SLOTMACHINE_OUTDIR)/reel_time_pikach
 	cat $^ >$@
 
 ### Pokemon types
-$(TYPESGFXDIR)/move_types.gbapal: $(TYPESGFXDIR)/move_types_1.gbapal \
-                                  $(TYPESGFXDIR)/move_types_2.gbapal \
-                                  $(TYPESGFXDIR)/move_types_3.gbapal
+$(TYPES_OUTDIR)/move_types.gbapal: $(TYPES_OUTDIR)/move_types_1.gbapal \
+                                  $(TYPES_OUTDIR)/move_types_2.gbapal \
+                                  $(TYPES_OUTDIR)/move_types_3.gbapal
 	cat $^ >$@
 
 $(TYPES_OUTDIR)/move_types.4bpp: $(types:%=$(TYPES_OUTDIR)/%.4bpp) $(contest_types:%=$(TYPES_OUTDIR)/contest_%.4bpp)
 	cat $^ >$@
 
 ### Miscellaneous ###
-graphics/title_screen/pokemon_logo.gbapal: %.gbapal: %.pal
+$(ASSETS_OBJ_DIR)/graphics/title_screen/pokemon_logo.gbapal: graphics/title_screen/pokemon_logo.pal
+	mkdir -p $(@D)
 	$(GFX) $< $@ -num_colors 224
 
 $(ASSETS_OBJ_DIR)/graphics/pokemon_jump/bg.4bpp: graphics/pokemon_jump/bg.png
