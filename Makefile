@@ -246,22 +246,22 @@ clean: tidy clean-assets
 	@$(MAKE) clean -C libagbsyscall
 
 clean-assets:
-	rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
-	rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
-	rm -f $(AUTO_GEN_TARGETS)
+	-rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
+	-rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
+	-rm -f $(AUTO_GEN_TARGETS)
 	-rm -rf $(ASSETS_OBJ_DIR)
 	-find . \( -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' \) -exec rm {} +
-	find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
+	-find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
 tidy: tidynonmodern tidymodern
 
 tidynonmodern:
-	rm -f $(LEGACY_ROM_NAME) $(LEGACY_ROM_NAME:.gba=.elf) $(LEGACY_ROM_NAME:.gba=.map)
-	rm -rf $(LEGACY_OBJ_DIR_NAME)
+	-rm -f $(LEGACY_ROM_NAME) $(LEGACY_ROM_NAME:.gba=.elf) $(LEGACY_ROM_NAME:.gba=.map)
+	-rm -rf $(LEGACY_OBJ_DIR_NAME)
 
 tidymodern:
-	rm -f $(MODERN_ROM_NAME) $(MODERN_ROM_NAME:.gba=.elf) $(MODERN_ROM_NAME:.gba=.map)
-	rm -rf $(MODERN_OBJ_DIR_NAME)
+	-rm -f $(MODERN_ROM_NAME) $(MODERN_ROM_NAME:.gba=.elf) $(MODERN_ROM_NAME:.gba=.map)
+	-rm -rf $(MODERN_OBJ_DIR_NAME)
 
 include graphics_file_rules.mk
 include map_data_rules.mk

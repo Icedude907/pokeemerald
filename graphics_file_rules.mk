@@ -61,20 +61,20 @@ $(shell mkdir -p $(SPECIAL_OUTDIRS))
 ### Castform has all 4 of its forms joined together before compression (in this order)
 castform_types := normal sunny rainy snowy
 $(CASTFORM_OUTDIR)/front.4bpp: $(patsubst %,$(CASTFORM_OUTDIR)/%/front.4bpp,$(castform_types))
-	@cat $^ >$@
+	cat $^ >$@
 
 $(CASTFORM_OUTDIR)/back.4bpp: $(patsubst %,$(CASTFORM_OUTDIR)/%/back.4bpp,$(castform_types))
-	@cat $^ >$@
+	cat $^ >$@
 
 $(CASTFORM_OUTDIR)/anim_front.4bpp: $(patsubst %,$(CASTFORM_OUTDIR)/%/anim_front.4bpp,$(castform_types))
-	@cat $^ >$@
+	cat $^ >$@
 
 # TODO: Remember to replace these lines.
 $(CASTFORM_OUTDIR)/normal.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/normal.gbapal,$(castform_types))
-	@cat $^ >$@
+	cat $^ >$@
 
 $(CASTFORM_OUTDIR)/shiny.gbapal: $(patsubst %,$(CASTFORMGFXDIR)/%/shiny.gbapal,$(castform_types))
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Tilesets
 $(TILESET_OUTDIR)/secondary/petalburg/tiles.4bpp: $(TILESETGFXDIR)/secondary/petalburg/tiles.png
@@ -374,22 +374,22 @@ $(FONT_OUTDIR)/frlg_female.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_female_font.pn
 $(UNUSEDGFXDIR)/obi_palpak1.gbapal: $(UNUSEDGFXDIR)/old_pal1.gbapal \
                                     $(UNUSEDGFXDIR)/old_pal2.gbapal \
                                     $(UNUSEDGFXDIR)/old_pal3.gbapal
-	@cat $^ >$@
+	cat $^ >$@
 
 $(UNUSEDGFXDIR)/obi_palpak3.gbapal: $(UNUSEDGFXDIR)/old_pal5.gbapal \
                                     $(UNUSEDGFXDIR)/old_pal6.gbapal \
                                     $(UNUSEDGFXDIR)/old_pal7.gbapal
-	@cat $^ >$@
+	cat $^ >$@
 
 $(UNUSED_OUTDIR)/obi1.4bpp: $(UNUSED_OUTDIR)/old_bulbasaur.4bpp \
                            $(UNUSED_OUTDIR)/old_charizard.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(UNUSED_OUTDIR)/obi2.4bpp: $(UNUSED_OUTDIR)/old_bulbasaur2.4bpp \
                            $(UNUSED_OUTDIR)/old_battle_interface_1.4bpp \
                            $(UNUSED_OUTDIR)/old_battle_interface_2.4bpp \
                            $(UNUSED_OUTDIR)/old_battle_interface_3.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(UNUSED_OUTDIR)/color_frames.4bpp: $(UNUSEDGFXDIR)/color_frames.png
 	$(GFX) $< $@ -num_tiles 353 -Wnum_tiles
@@ -398,7 +398,7 @@ $(UNUSEDGFXDIR)/redyellowgreen_frame.bin: $(UNUSEDGFXDIR)/red_frame.bin \
                                           $(UNUSEDGFXDIR)/yellow_frame.bin \
                                           $(UNUSEDGFXDIR)/green_frame.bin \
                                           $(UNUSEDGFXDIR)/blank_frame.bin
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Battle transitions
 # @Icedude NOTE: $(BATTRANS_OUTDIR)/vs_frame.4bpp: %.4bpp: $(BATTRANSGFXDIR)/%.png
@@ -416,29 +416,29 @@ $(BATTRANS_OUTDIR)/frontier_logo_center.4bpp: $(BATTRANSGFXDIR)/frontier_logo_ce
 
 $(BATTRANS_OUTDIR)/frontier_square_1.4bpp: $(BATTRANS_OUTDIR)/frontier_squares_blanktiles.4bpp \
                                           $(BATTRANS_OUTDIR)/frontier_squares_1.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BATTRANS_OUTDIR)/frontier_square_2.4bpp: $(BATTRANS_OUTDIR)/frontier_squares_blanktiles.4bpp \
                                           $(BATTRANS_OUTDIR)/frontier_squares_2.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BATTRANS_OUTDIR)/frontier_square_3.4bpp: $(BATTRANS_OUTDIR)/frontier_squares_blanktiles.4bpp \
                                           $(BATTRANS_OUTDIR)/frontier_squares_3.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BATTRANS_OUTDIR)/frontier_square_4.4bpp: $(BATTRANS_OUTDIR)/frontier_squares_blanktiles.4bpp \
                                           $(BATTRANS_OUTDIR)/frontier_squares_4.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Battle Interface
 $(BATINTGFXDIR)/textbox.gbapal: $(BATINTGFXDIR)/textbox_0.gbapal \
                                 $(BATINTGFXDIR)/textbox_1.gbapal
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BATINT_OUTDIR)/battle_bar.4bpp: $(BATINT_OUTDIR)/hpbar_anim_unused.4bpp \
                                  $(BATINT_OUTDIR)/numbers1.4bpp \
                                  $(BATINT_OUTDIR)/numbers2.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BATINT_OUTDIR)/unused_window2bar.4bpp: $(BATINTGFXDIR)/unused_window2bar.png
 	$(GFX) $< $@ -num_tiles 5 -Wnum_tiles
@@ -448,26 +448,26 @@ $(BTLANMSPR_OUTDIR)/ice_cube.4bpp: $(BTLANMSPR_OUTDIR)/ice_cube_0.4bpp \
                                   $(BTLANMSPR_OUTDIR)/ice_cube_1.4bpp \
                                   $(BTLANMSPR_OUTDIR)/ice_cube_2.4bpp \
                                   $(BTLANMSPR_OUTDIR)/ice_cube_3.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BTLANMSPR_OUTDIR)/ice_crystals.4bpp: $(BTLANMSPR_OUTDIR)/ice_crystals_0.4bpp \
                                       $(BTLANMSPR_OUTDIR)/ice_crystals_1.4bpp \
                                       $(BTLANMSPR_OUTDIR)/ice_crystals_2.4bpp \
                                       $(BTLANMSPR_OUTDIR)/ice_crystals_3.4bpp \
                                       $(BTLANMSPR_OUTDIR)/ice_crystals_4.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BTLANMSPR_OUTDIR)/mud_sand.4bpp: $(BTLANMSPR_OUTDIR)/mud_sand_0.4bpp \
                                   $(BTLANMSPR_OUTDIR)/mud_sand_1.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BTLANMSPR_OUTDIR)/flower.4bpp: $(BTLANMSPR_OUTDIR)/flower_0.4bpp \
                                 $(BTLANMSPR_OUTDIR)/flower_1.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(BTLANMSPR_OUTDIR)/spark.4bpp: $(BTLANMSPR_OUTDIR)/spark_0.4bpp \
                                $(BTLANMSPR_OUTDIR)/spark_1.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Rayquaza scene
 $(RAYQUAZA_OUTDIR)/scene_2/rayquaza.8bpp: $(RAYQUAZAGFXDIR)/scene_2/rayquaza.png
@@ -498,11 +498,11 @@ $(RAYQUAZA_OUTDIR)/scene_4/rayquaza.4bpp: $(RAYQUAZAGFXDIR)/scene_4/rayquaza.png
 ### Japaneese Contests
 jpcontest_composite1 = frame_1 floor frame_2 symbols meter letters numbers
 $(JPCONTEST_OUTDIR)/composite_1.4bpp: $(patsubst %,$(JPCONTEST_OUTDIR)/%.4bpp,$(jpcontest_composite1))
-	@cat $^ >$@
+	cat $^ >$@
 
 $(JPCONTEST_OUTDIR)/composite_2.4bpp: $(JPCONTEST_OUTDIR)/interface.4bpp \
                                      $(JPCONTEST_OUTDIR)/audience.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 # $(JPCONTEST_OUTDIR)/voltage.4bpp: $(JPCONTEST_OUTDIR)/%.4bpp: %.png
 $(JPCONTEST_OUTDIR)/voltage.4bpp: $(JPCONTESTGFXDIR)/voltage.png
@@ -511,26 +511,26 @@ $(JPCONTEST_OUTDIR)/voltage.4bpp: $(JPCONTESTGFXDIR)/voltage.png
 ### Game Corner
 $(ROULETTE_OUTDIR)/roulette_tilt.4bpp: $(ROULETTE_OUTDIR)/shroomish.4bpp \
                                       $(ROULETTE_OUTDIR)/tailow.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(ROULETTE_OUTDIR)/wheel_icons.4bpp: $(ROULETTE_OUTDIR)/wynaut.4bpp \
                                     $(ROULETTE_OUTDIR)/azurill.4bpp \
                                     $(ROULETTE_OUTDIR)/skitty.4bpp \
                                     $(ROULETTE_OUTDIR)/makuhita.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 $(SLOTMACHINE_OUTDIR)/reel_time_gfx.4bpp: $(SLOTMACHINE_OUTDIR)/reel_time_pikachu.4bpp \
                                          $(SLOTMACHINE_OUTDIR)/reel_time_machine.4bpp
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Pokemon types
 $(TYPESGFXDIR)/move_types.gbapal: $(TYPESGFXDIR)/move_types_1.gbapal \
                                   $(TYPESGFXDIR)/move_types_2.gbapal \
                                   $(TYPESGFXDIR)/move_types_3.gbapal
-	@cat $^ >$@
+	cat $^ >$@
 
 $(TYPES_OUTDIR)/move_types.4bpp: $(types:%=$(TYPES_OUTDIR)/%.4bpp) $(contest_types:%=$(TYPES_OUTDIR)/contest_%.4bpp)
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Miscellaneous ###
 graphics/title_screen/pokemon_logo.gbapal: %.gbapal: %.pal
@@ -565,7 +565,7 @@ $(MISC_OUTDIR)/japanese_hof.4bpp: $(MISCGFXDIR)/japanese_hof.png
 $(MASKS_OUTDIR)/unused_level_up.4bpp: $(MASKSGFXDIR)/unused_level_up.png
 	$(GFX) $< $@ -num_tiles 14 -Wnum_tiles
 
-$(PARTYMENU_OUTDIR): $(PARTYMENUGFXDIR)/bg.png
+$(PARTYMENU_OUTDIR)/bg.4bpp: $(PARTYMENUGFXDIR)/bg.png
 	$(GFX) $< $@ -num_tiles 62 -Wnum_tiles
 
 ### Pokémon Storage System
@@ -653,136 +653,136 @@ $(WALLPAPER_OUTDIR)/friends_frame2.4bpp: $(WALLPAPERGFXDIR)/friends_frame2.png
 #### Compound wallpapers
 $(WALLPAPER_OUTDIR)/forest/tiles.4bpp: $(WALLPAPER_OUTDIR)/forest/frame.4bpp $(WALLPAPER_OUTDIR)/forest/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/city/tiles.4bpp: $(WALLPAPER_OUTDIR)/city/frame.4bpp $(WALLPAPER_OUTDIR)/city/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/desert/tiles.4bpp: $(WALLPAPER_OUTDIR)/desert/frame.4bpp $(WALLPAPER_OUTDIR)/desert/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/savanna/tiles.4bpp: $(WALLPAPER_OUTDIR)/savanna/frame.4bpp $(WALLPAPER_OUTDIR)/savanna/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/crag/tiles.4bpp: $(WALLPAPER_OUTDIR)/crag/frame.4bpp $(WALLPAPER_OUTDIR)/crag/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/volcano/tiles.4bpp: $(WALLPAPER_OUTDIR)/volcano/frame.4bpp $(WALLPAPER_OUTDIR)/volcano/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/snow/tiles.4bpp: $(WALLPAPER_OUTDIR)/snow/frame.4bpp $(WALLPAPER_OUTDIR)/snow/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/cave/tiles.4bpp: $(WALLPAPER_OUTDIR)/cave/frame.4bpp $(WALLPAPER_OUTDIR)/cave/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/beach/tiles.4bpp: $(WALLPAPER_OUTDIR)/beach/frame.4bpp $(WALLPAPER_OUTDIR)/beach/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/seafloor/tiles.4bpp: $(WALLPAPER_OUTDIR)/seafloor/frame.4bpp $(WALLPAPER_OUTDIR)/seafloor/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/river/tiles.4bpp: $(WALLPAPER_OUTDIR)/river/frame.4bpp $(WALLPAPER_OUTDIR)/river/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/sky/tiles.4bpp: $(WALLPAPER_OUTDIR)/sky/frame.4bpp $(WALLPAPER_OUTDIR)/sky/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/polkadot/tiles.4bpp: $(WALLPAPER_OUTDIR)/polkadot/frame.4bpp $(WALLPAPER_OUTDIR)/polkadot/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/pokecenter/tiles.4bpp: $(WALLPAPER_OUTDIR)/pokecenter/frame.4bpp $(WALLPAPER_OUTDIR)/pokecenter/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/machine/tiles.4bpp: $(WALLPAPER_OUTDIR)/machine/frame.4bpp $(WALLPAPER_OUTDIR)/machine/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/plain/tiles.4bpp: $(WALLPAPER_OUTDIR)/plain/frame.4bpp $(WALLPAPER_OUTDIR)/plain/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/zigzagoon/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/zigzagoon/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/screen/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/screen/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/horizontal/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/horizontal/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/diagonal/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/diagonal/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/block/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/block/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/ribbon/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/ribbon/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/pokecenter2/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/pokecenter2/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/frame/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/frame/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/blank/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/blank/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/circles/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame1.4bpp $(WALLPAPER_OUTDIR)/circles/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/azumarill/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame2.4bpp $(WALLPAPER_OUTDIR)/azumarill/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/pikachu/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame2.4bpp $(WALLPAPER_OUTDIR)/pikachu/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/legendary/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame2.4bpp $(WALLPAPER_OUTDIR)/legendary/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/dusclops/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame2.4bpp $(WALLPAPER_OUTDIR)/dusclops/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/ludicolo/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame2.4bpp $(WALLPAPER_OUTDIR)/ludicolo/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 $(WALLPAPER_OUTDIR)/whiscash/tiles.4bpp: $(WALLPAPER_OUTDIR)/friends_frame2.4bpp $(WALLPAPER_OUTDIR)/whiscash/bg.4bpp
 	@mkdir -p $(@D)
-	@cat $^ >$@
+	cat $^ >$@
 
 ### Pokenav
 pknav_options = hoenn_map condition match_call ribbons switch_off party search $(contest_types) cancel
 $(PKNAVOPTIONS_OUTDIR)/options.4bpp: $(patsubst %,$(PKNAVOPTIONS_OUTDIR)/%.4bpp,$(pknav_options))
-	@cat $^ >$@
+	cat $^ >$@
 
 $(PKNAV_OUTDIR)/header.4bpp : $(PKNAVGFXDIR)/header.png
 	$(GFX) $< $@ -num_tiles 53 -Wnum_tiles
