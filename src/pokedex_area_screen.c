@@ -108,7 +108,7 @@ static void ResetPokedexAreaMapBg(void);
 static void DestroyAreaScreenSprites(void);
 
 static const u32 sAreaGlow_Pal[] = INCBIN_U32("graphics/pokedex/area_glow.gbapal");
-static const u32 sAreaGlow_Gfx[] = INCBIN_U32("graphics/pokedex/area_glow.4bpp.lz");
+static const u32 sAreaGlow_Gfx[] = INCBIN_U32("build/assets/graphics/pokedex/area_glow.4bpp.lz");
 
 static const u16 sSpeciesHiddenFromAreaScreen[] = { SPECIES_WYNAUT };
 
@@ -177,7 +177,7 @@ static const struct SpriteTemplate sAreaMarkerSpriteTemplate =
 };
 
 static const u16 sAreaMarkerPalette[] = INCBIN_U16("graphics/pokedex/area_marker.gbapal");
-static const u8 sAreaMarkerTiles[] = INCBIN_U8("graphics/pokedex/area_marker.4bpp");
+static const u8 sAreaMarkerTiles[] = INCBIN_U8("build/assets/graphics/pokedex/area_marker.4bpp");
 
 static const struct SpritePalette sAreaUnknownSpritePalette =
 {

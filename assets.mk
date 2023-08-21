@@ -8,15 +8,17 @@
 # Off to the assets folder you go
 # FIXME: Lots of mkdir
 $(ASSETS_OBJ_DIR)/%.1bpp: %.png
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(GFX) $< $@
-%.4bpp: %.png
+$(ASSETS_OBJ_DIR)/%.4bpp: %.png
+	@mkdir -p $(@D)
 	$(GFX) $< $@
 $(ASSETS_OBJ_DIR)/%.8bpp: %.png
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(GFX) $< $@
 %.gbapal: %.pal
 	$(GFX) $< $@
+# Derives the palette from the image in the absence of a .pal file
 %.gbapal: %.png
 	$(GFX) $< $@
 

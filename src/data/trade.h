@@ -622,7 +622,7 @@ static const u8 sSelectedMonLevelGenderCoords[3][2] =
 };
 
 static const u16 sPokeball_Pal[] = INCBIN_U16("graphics/trade/pokeball.gbapal");
-static const u8 sPokeball_Gfx[] = INCBIN_U8("graphics/trade/pokeball.4bpp");
+static const u8 sPokeball_Gfx[] = INCBIN_U8("build/assets/graphics/trade/pokeball.4bpp");
 static const u8 sPokeballSymbol_Gfx[] = INCBIN_U8("build/assets/graphics/trade/pokeball_symbol.8bpp"); // unused
 static const u16 sCableCloseup_Map[] = INCBIN_U16("graphics/trade/crossing_highlight_cable.bin");
 static const u16 sPokeballSymbol_Map[] = INCBIN_U16("graphics/trade/pokeball_symbol_map.bin"); // unused?
@@ -631,10 +631,10 @@ static const u16 sGba_Pal[] = INCBIN_U16("graphics/trade/gba.gbapal");
 static const u16 sUnusedPal2[] = INCBIN_U16("graphics/trade/unused2.gbapal");
 static const u16 sWirelessSignalNone_Pal_Unused[] = INCBIN_U16("graphics/trade/wireless_signal_none.gbapal");
 static const u16 sLinkMon_Pal[] = INCBIN_U16("graphics/trade/link_mon.gbapal");
-static const u8 sLinkMonGlow_Gfx[] = INCBIN_U8("graphics/trade/link_mon_glow.4bpp");
-static const u8 sLinkMonShadow_Gfx[] = INCBIN_U8("graphics/trade/link_mon_shadow.4bpp");
-static const u8 sCableEnd_Gfx[] = INCBIN_U8("graphics/trade/cable_end.4bpp");
-static const u8 sGbaScreen_Gfx[] = INCBIN_U8("graphics/trade/gba_screen.4bpp");
+static const u8 sLinkMonGlow_Gfx[] = INCBIN_U8("build/assets/graphics/trade/link_mon_glow.4bpp");
+static const u8 sLinkMonShadow_Gfx[] = INCBIN_U8("build/assets/graphics/trade/link_mon_shadow.4bpp");
+static const u8 sCableEnd_Gfx[] = INCBIN_U8("build/assets/graphics/trade/cable_end.4bpp");
+static const u8 sGbaScreen_Gfx[] = INCBIN_U8("build/assets/graphics/trade/gba_screen.4bpp");
 const u16 gTradePlatform_Tilemap[] = INCBIN_U16("graphics/trade/platform.bin");
 static const u8 sGbaAffine_Gfx[] = INCBIN_U8("build/assets/graphics/trade/gba_affine.8bpp"); // Only the gfx for when the GBA is zooming in/out
 static const u8 sEmptyGfx[64] = {};
@@ -646,7 +646,7 @@ static const u32 sWirelessCloseup_Map[] = INCBIN_U32("graphics/trade/crossing_hi
 static const u16 sWirelessSignalSend_Pal[] = INCBIN_U16("graphics/trade/wireless_signal_send.gbapal");
 static const u16 sWirelessSignalRecv_Pal[] = INCBIN_U16("graphics/trade/wireless_signal_receive.gbapal");
 static const u16 sWirelessSignalNone_Pal[] = INCBIN_U16("graphics/trade/wireless_signal_none.gbapal");
-static const u32 sWirelessSignal_Gfx[] = INCBIN_U32("graphics/trade/wireless_signal.4bpp.lz");
+static const u32 sWirelessSignal_Gfx[] = INCBIN_U32("build/assets/graphics/trade/wireless_signal.4bpp.lz");
 static const u32 sWirelessSignal_Tilemap[] = INCBIN_U32("graphics/trade/wireless_signal.bin.lz");
 
 static const struct OamData sOamData_Pokeball =

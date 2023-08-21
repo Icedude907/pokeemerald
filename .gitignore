@@ -21,16 +21,15 @@ tools/agbcc
 *.gba
 !data/*.gba
 *.elf
+*.map
 *.o
 *.exe
 *.a
 *.i
 *.sym
-*.4bpp
 *.gbapal
 *.lz
 *.rl
-*.map
 *.dump
 
 # Unknown/Other
