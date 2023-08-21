@@ -218,7 +218,7 @@ endif
 AUTO_GEN_TARGETS :=
 
 # Make rules
-.PHONY: all rom modern compare clean-all clean-tools clean clean-assets tidy tidymodern tidynonmodern tools $(TOOLDIRS) libagbsyscall
+.PHONY: all rom modern compare clean-all clean-tools clean clean-assets tidy tidymodern tidynonmodern tools $(TOOLDIRS) libagbsyscall clean-assets-old
 
 all: rom
 modern: all
@@ -250,8 +250,15 @@ clean-assets:
 	-rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
 	-rm -f $(AUTO_GEN_TARGETS)
 	-rm -rf $(ASSETS_OBJ_DIR)
-	-find . \( -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' \) -exec rm {} +
+	-find . \( -iname '*.lz' -o -iname '*.rl' \) -exec rm {} +
 	-find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
+
+# To be used for those upgrading from before the `build/assets` switch
+clean-assets-old:
+	-rm -f $(SAMPLE_SUBDIR)/*.bin
+	-rm -f $(CRY_SUBDIR)/*.bin
+	-rm -f $(MID_SUBDIR)/*.s
+	-find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' -o -iname '*.latfont' -o -iname '*.hwjpnfont' -o -iname '*.fwjpnfont' \) -exec rm {} +
 
 tidy: tidynonmodern tidymodern
 
