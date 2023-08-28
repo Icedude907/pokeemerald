@@ -15,7 +15,6 @@ ifeq (modern,$(MAKECMDGOALS))
   MODERN := 1
 endif
 
-
 # don't use dkP's base_tools anymore
 # because the redefinition of $(CC) conflicts
 # with when we want to use $(CC) to preprocess files
@@ -149,8 +148,6 @@ MAKEFLAGS += --no-print-directory
 .SECONDARY:
 # Delete files that weren't built properly
 .DELETE_ON_ERROR:
-# Secondary expansion is required for dependency variables in object rules.
-.SECONDEXPANSION:
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
@@ -246,11 +243,11 @@ clean: tidy clean-assets
 	@$(MAKE) clean -C libagbsyscall
 
 clean-assets:
+	-rm -rf $(ASSETS_OBJ_DIR)
+	@echo "AUTO_GEN_TARGETS: $(AUTO_GEN_TARGETS)"
+	-rm -f $(AUTO_GEN_TARGETS)
 	-rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
 	-rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
-	-rm -f $(AUTO_GEN_TARGETS)
-	-rm -rf $(ASSETS_OBJ_DIR)
-	-find . \( -iname '*.lz' -o -iname '*.rl' \) -exec rm {} +
 	-find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
 # To be used for those upgrading from before the `build/assets` switch

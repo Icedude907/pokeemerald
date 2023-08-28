@@ -26,7 +26,13 @@ $(ASSETS_OBJ_DIR)/%.gbapal: %.png
 
 # These rules are cool. Because make can extract linked files from your source code,
 # if you put `.lz` on the end of a filename it'll be automatically compressed!
-%.lz: %
+$(ASSETS_OBJ_DIR)/%.lz: $(ASSETS_OBJ_DIR)/%
 	$(GFX) $< $@
-%.rl: %
+$(ASSETS_OBJ_DIR)/%.rl: $(ASSETS_OBJ_DIR)/%
+	$(GFX) $< $@
+$(ASSETS_OBJ_DIR)/%.lz: %
+	@mkdir -p $(@D)
+	$(GFX) $< $@
+$(ASSETS_OBJ_DIR)/%.rl: %
+	@mkdir -p $(@D)
 	$(GFX) $< $@

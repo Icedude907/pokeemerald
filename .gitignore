@@ -27,8 +27,6 @@ tools/agbcc
 *.a
 *.i
 *.sym
-*.lz
-*.rl
 *.dump
 
 # Unknown/Other
