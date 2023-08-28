@@ -334,40 +334,16 @@ $(TILESET_OUTDIR)/secondary/secret_base/red_cave/unused_tiles.4bpp: $(TILESETGFX
 	$(GFX) $< $@ -num_tiles 82 -Wnum_tiles
 
 ### Fonts ###
-$(FONT_OUTDIR)/small.latfont: $(FONTGFXDIR)/latin_small.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/normal.latfont: $(FONTGFXDIR)/latin_normal.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/short.latfont: $(FONTGFXDIR)/latin_short.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/narrow.latfont: $(FONTGFXDIR)/latin_narrow.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/small_narrow.latfont: $(FONTGFXDIR)/latin_small_narrow.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/small.hwjpnfont: $(FONTGFXDIR)/japanese_small.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/normal.hwjpnfont: $(FONTGFXDIR)/japanese_normal.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/bold.hwjpnfont: $(FONTGFXDIR)/japanese_bold.png
-	$(GFX) $< $@
-
-$(FONT_OUTDIR)/short.fwjpnfont: $(FONTGFXDIR)/japanese_short.png
+$(FONT_OUTDIR)/%.latfont: $(FONTGFXDIR)/latin_%.png
 	$(GFX) $< $@
 
 $(FONT_OUTDIR)/braille.fwjpnfont: $(FONTGFXDIR)/braille.png
 	$(GFX) $< $@
 
-$(FONT_OUTDIR)/frlg_male.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_male_font.png
+$(FONT_OUTDIR)/%.hwjpnfont: $(FONTGFXDIR)/japanese_%.png
 	$(GFX) $< $@
 
-$(FONT_OUTDIR)/frlg_female.fwjpnfont: $(FONTGFXDIR)/japanese_frlg_female_font.png
+$(FONT_OUTDIR)/%.fwjpnfont: $(FONTGFXDIR)/japanese_%.png
 	$(GFX) $< $@
 
 ### Unused Graphics

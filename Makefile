@@ -8,6 +8,7 @@ REVISION    := 0
 
 # `File name`.gba ('_modern' will be appended to the modern builds)
 FILE_NAME := pokeemerald
+BUILD_DIR := build
 
 # Builds the ROM using a modern compiler
 MODERN      ?= 0
@@ -40,33 +41,27 @@ ifeq ($(OS),Windows_NT)
 endif
 
 # Pick C++ preprocessor
+CPP := $(PREFIX)cpp
 ifeq ($(MODERN),0)
-  ifeq ($(shell uname -s),Darwin)
-    # Use arm-none-eabi-cpp for macOS
-    # MacOS' default compiler is clang, which will warn on \u
-    # when preprocessing asm files, expecting a unicode literal
-    CPP := $(PREFIX)cpp
-  else
+  ifneq ($(shell uname -s),Darwin)
     # we can't unconditionally use arm-none-eabi-cpp
     # as installations which install binutils-arm-none-eabi
     # don't come with it
     CPP := $(CC) -E
   endif
-else
-  CPP := $(PREFIX)cpp
 endif
 
 SHELL := /bin/bash -o pipefail
 
 # Assign useful variables
 LEGACY_ROM_NAME := $(FILE_NAME).gba
-LEGACY_OBJ_DIR_NAME := build/emerald
+LEGACY_OBJ_DIR_NAME := $(BUILD_DIR)/emerald
 
 MODERN_ROM_NAME := $(FILE_NAME)_modern.gba
-MODERN_OBJ_DIR_NAME := build/modern
+MODERN_OBJ_DIR_NAME := $(BUILD_DIR)/modern
 
 # Shared dir for asset files, (not finalised .o files).
-ASSETS_OBJ_DIR := build/assets
+ASSETS_OBJ_DIR := $(BUILD_DIR)/assets
 
 # Pick our chosen variables
 ifeq ($(MODERN),0)
@@ -88,8 +83,6 @@ DATA_SRC_SUBDIR = src/data
 DATA_ASM_SUBDIR = data
 SONG_SUBDIR = sound/songs
 MID_SUBDIR = sound/songs/midi
-SAMPLE_SUBDIR = sound/direct_sound_samples
-CRY_SUBDIR = sound/direct_sound_samples/cries
 
 C_BUILDDIR = $(OBJ_DIR)/$(C_SUBDIR)
 GFLIB_BUILDDIR = $(OBJ_DIR)/$(GFLIB_SUBDIR)
@@ -141,6 +134,9 @@ TOOLS = $(foreach tool,$(TOOLBASE),tools/$(tool)/$(tool)$(EXE))
 MAKEFLAGS += --no-print-directory
 
 # Special targets
+RULES_NO_SCAN := clean-all clean-tools clean clean-assets clean-assets-old tidy tidymodern tidynonmodern tools $(TOOLDIRS) libagbsyscall
+.PHONY: all rom modern compare
+.PHONY: $(RULES_NO_SCAN)
 
 # Clear the default suffixes
 .SUFFIXES:
@@ -151,30 +147,26 @@ MAKEFLAGS += --no-print-directory
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
-# Optimise dependency checking
-# None: clean, tidy, tools, and derivatives
-# Some: 
-# All:
-# FIXME: I don't understand this.
-
-# Build tools when building the rom
-# Disable dependency scanning for clean/tidy/tools
-# Use a separate minimal makefile for speed
-# Since we don't need to reload most of this makefile
-ifeq (,$(filter-out all rom compare modern libagbsyscall syms,$(MAKECMDGOALS)))
-  $(call infoshell, $(MAKE) -f make_tools.mk)
-else
-  NODEP ?= 1
-endif
-
 # Check if we need to scan dependencies based on the rule
+# Disable dependency scanning for clean/tidy/tools
+# FIXME: Why the oxymoronic variables?
 SCAN_DEPS ?= 1
+NODEP ?= 0
 ifeq (,$(MAKECMDGOALS))
-  # As above
-else ifeq (,$(filter-out clean tidy tools mostlyclean clean-tools $(TOOLDIRS) tidymodern tidynonmodern libagbsyscall,$(MAKECMDGOALS)))
-  # clean, tidy, tools, mostlyclean, clean-tools, $(TOOLDIRS), tidymodern, tidynonmodern don't even build the ROM
-  # libagbsyscall does its own thing
-  SCAN_DEPS ?= 0
+#   $(info Default (Scan))
+  $(call infoshell, $(MAKE) -f make_tools.mk)
+  # Default target (all) Scan 1, NoDep 0
+else
+  ifeq (,$(filter-out $(RULES_NO_SCAN),$(MAKECMDGOALS)))
+    # No scan rules Scan 0, NoDep 1
+    # $(info No Scan )
+    SCAN_DEPS := 0
+    NODEP := 1
+  else
+    # Scan rules no deps Scan 1, NoDep 0
+    # $(info Scan)
+    $(call infoshell, $(MAKE) -f make_tools.mk)
+  endif
 endif
 
 ifeq ($(SCAN_DEPS),1)
@@ -215,8 +207,6 @@ endif
 AUTO_GEN_TARGETS :=
 
 # Make rules
-.PHONY: all rom modern compare clean-all clean-tools clean clean-assets tidy tidymodern tidynonmodern tools $(TOOLDIRS) libagbsyscall clean-assets-old
-
 all: rom
 modern: all
 compare: all
@@ -252,10 +242,14 @@ clean-assets:
 
 # To be used for those upgrading from before the `build/assets` switch
 clean-assets-old:
-	-rm -f $(SAMPLE_SUBDIR)/*.bin
-	-rm -f $(CRY_SUBDIR)/*.bin
+	-rm -f sound/direct_sound_samples/*.bin
+	-rm -f sound/direct_sound_samples/cries/*.bin
 	-rm -f $(MID_SUBDIR)/*.s
 	-find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' -o -iname '*.latfont' -o -iname '*.hwjpnfont' -o -iname '*.fwjpnfont' \) -exec rm {} +
+	-rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
+	-rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
+	-find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
+
 
 tidy: tidynonmodern tidymodern
 
@@ -267,11 +261,10 @@ tidymodern:
 	-rm -f $(MODERN_ROM_NAME) $(MODERN_ROM_NAME:.gba=.elf) $(MODERN_ROM_NAME:.gba=.map)
 	-rm -rf $(MODERN_OBJ_DIR_NAME)
 
-include graphics_file_rules.mk
-include map_data_rules.mk
+include codegen_rules.mk
+include graphics_rules.mk
 include spritesheet_rules.mk
-include json_data_rules.mk
-include audio.mk
+include audio_rules.mk
 include assets.mk
 
 # Modify build flags for some files.
