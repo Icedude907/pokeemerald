@@ -17,7 +17,7 @@
 #include "constants/trainer_hill.h"
 
 // Prevent cross-jump optimization.
-// @Icedude: NOTE: Turns out this is never used?
+// Turns out this is never used?
 #define BLOCK_CROSS_JUMP asm("");
 
 // to help in decompiling
@@ -39,14 +39,10 @@
 #define INCBIN_S32  INCBIN
 #endif // IDE support
 
-// Compiled assets are to be found here
-// @Icedude: TODO: Unused, requires macro expansion in INCBIN which the preproc currently doesn't do
-#define ASSETS_DIR "build/assets/"
-
 #define ARRAY_COUNT(array) (size_t)(sizeof(array) / sizeof((array)[0]))
 
 // GameFreak used a macro called "NELEMS", as evidenced by AgbAssert calls.
-// @Icedude: Yea but we never use it.
+// But we never use it.
 #define NELEMS(arr) (sizeof(arr)/sizeof(*(arr)))
 
 #define SWAP(a, b, temp)    \

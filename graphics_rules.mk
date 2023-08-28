@@ -371,7 +371,6 @@ $(UNUSED_OUTDIR)/redyellowgreen_frame.bin: $(patsubst %,$(UNUSEDGFXDIR)/%.bin,$(
 	cat $^ >$@
 
 ### Battle transitions
-# @Icedude NOTE: $(BATTRANS_OUTDIR)/vs_frame.4bpp: %.4bpp: $(BATTRANSGFXDIR)/%.png
 $(BATTRANS_OUTDIR)/vs_frame.4bpp: $(BATTRANSGFXDIR)/vs_frame.png
 	$(GFX) $< $@ -num_tiles 16 -Wnum_tiles
 
