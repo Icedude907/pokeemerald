@@ -114,30 +114,28 @@ else
   LIB := $(LIBPATH) -lc -lnosys -lgcc -L../../libagbsyscall -lagbsyscall
 endif
 
+# Default rule
+all: rom
 
 # Tool Executables
+include make_tools.mk
 SHA1 := $(shell { command -v sha1sum || command -v shasum; } 2>/dev/null) -c
-GFX := tools/gbagfx/gbagfx$(EXE)
-AIF := tools/aif2pcm/aif2pcm$(EXE)
-MID := tools/mid2agb/mid2agb$(EXE)
-SCANINC := tools/scaninc/scaninc$(EXE)
-PREPROC := tools/preproc/preproc$(EXE)
-RAMSCRGEN := tools/ramscrgen/ramscrgen$(EXE)
-FIX := tools/gbafix/gbafix$(EXE)
-MAPJSON := tools/mapjson/mapjson$(EXE)
-JSONPROC := tools/jsonproc/jsonproc$(EXE)
+GFX := $(TOOLS_DIR)/gbagfx/gbagfx$(EXE)
+AIF := $(TOOLS_DIR)/aif2pcm/aif2pcm$(EXE)
+MID := $(TOOLS_DIR)/mid2agb/mid2agb$(EXE)
+SCANINC := $(TOOLS_DIR)/scaninc/scaninc$(EXE)
+PREPROC := $(TOOLS_DIR)/preproc/preproc$(EXE)
+RAMSCRGEN := $(TOOLS_DIR)/ramscrgen/ramscrgen$(EXE)
+FIX := $(TOOLS_DIR)/gbafix/gbafix$(EXE)
+MAPJSON := $(TOOLS_DIR)/mapjson/mapjson$(EXE)
+JSONPROC := $(TOOLS_DIR)/jsonproc/jsonproc$(EXE)
 
 PERL := perl
-
-# Inclusive list. If you don't want a tool to be built, don't add it here.
-TOOLDIRS := tools/aif2pcm tools/bin2c tools/gbafix tools/gbagfx tools/jsonproc tools/mapjson tools/mid2agb tools/preproc tools/ramscrgen tools/rsfont tools/scaninc
-TOOLBASE = $(TOOLDIRS:tools/%=%)
-TOOLS = $(foreach tool,$(TOOLBASE),tools/$(tool)/$(tool)$(EXE))
 
 MAKEFLAGS += --no-print-directory
 
 # Special targets
-RULES_NO_SCAN := clean-all clean-tools clean clean-assets clean-assets-old tidy tidymodern tidynonmodern tools $(TOOLDIRS) libagbsyscall
+RULES_NO_SCAN += clean-all clean clean-assets clean-assets-old tidy tidymodern tidynonmodern libagbsyscall
 .PHONY: all rom modern compare
 .PHONY: $(RULES_NO_SCAN)
 
@@ -152,18 +150,17 @@ infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst 
 
 # Check if we need to scan dependencies based on the rule
 NODEP ?= 0
-ifeq (,$(MAKECMDGOALS))
-  # Default target
-  $(info Default (Scan))
-  $(call infoshell, $(MAKE) -f make_tools.mk)
-else
+ifneq (,$(MAKECMDGOALS))
   ifeq (,$(filter-out $(RULES_NO_SCAN),$(MAKECMDGOALS)))
-    # $(info No Scan )
+    $(info No Scan )
     NODEP := 1
-  else
-    $(info Scan)
-    $(call infoshell, $(MAKE) -f make_tools.mk)
   endif
+endif
+ifneq ($(NODEP),1)
+  # Default target or a rule requiring a scan.
+  # $(info Scan)
+  # Forcibly execute `make tools` since we presumably need them for what we are doing.
+  $(call infoshell, $(MAKE) -f make_tools.mk)
 endif
 
 ifneq ($(NODEP),1)
@@ -204,27 +201,15 @@ endif
 AUTO_GEN_TARGETS :=
 
 # Make rules
-all: rom
 modern: all
 compare: all
 	@$(SHA1) rom.sha1
 
-tools: $(TOOLDIRS)
-check-tools: $(CHECKTOOLDIRS)
 syms: $(SYM)
-
-$(TOOLDIRS):
-	@$(MAKE) -C $@
-
-$(CHECKTOOLDIRS):
-	@$(MAKE) -C $@
 
 rom: $(ROM)
 
 clean-all: clean clean-tools
-
-clean-tools:
-	@$(foreach tooldir,$(TOOLDIRS),$(MAKE) clean -C $(tooldir);)
 
 clean: tidy clean-assets
 	@$(MAKE) clean -C libagbsyscall
@@ -246,7 +231,6 @@ clean-assets-old:
 	-rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
 	-rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
 	-find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
-
 
 tidy: tidynonmodern tidymodern
 
