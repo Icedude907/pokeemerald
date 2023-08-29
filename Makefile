@@ -95,7 +95,10 @@ MID_BUILDDIR = $(OBJ_DIR)/$(MID_SUBDIR)
 ASFLAGS := -mcpu=arm7tdmi --defsym MODERN=$(MODERN)
 LDFLAGS := -Map ../../$(MAP)
 
-CPPFLAGS := -iquote include -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN)
+INCLUDE_DIRS := include
+INCLUDE_CPP := $(INCLUDE_DIRS:%=-iquote %)
+
+CPPFLAGS := $(INCLUDE_CPP) -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN)
 ifeq ($(MODERN),0)
   CC1             := tools/agbcc/bin/agbcc$(EXE)
   override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -O2 -fhex-asm -g
