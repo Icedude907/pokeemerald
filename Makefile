@@ -151,28 +151,22 @@ RULES_NO_SCAN := clean-all clean-tools clean clean-assets clean-assets-old tidy 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
 # Check if we need to scan dependencies based on the rule
-# Disable dependency scanning for clean/tidy/tools
-# FIXME: Why the oxymoronic variables?
-SCAN_DEPS ?= 1
 NODEP ?= 0
 ifeq (,$(MAKECMDGOALS))
-#   $(info Default (Scan))
+  # Default target
+  $(info Default (Scan))
   $(call infoshell, $(MAKE) -f make_tools.mk)
-  # Default target (all) Scan 1, NoDep 0
 else
   ifeq (,$(filter-out $(RULES_NO_SCAN),$(MAKECMDGOALS)))
-    # No scan rules Scan 0, NoDep 1
     # $(info No Scan )
-    SCAN_DEPS := 0
     NODEP := 1
   else
-    # Scan rules no deps Scan 1, NoDep 0
-    # $(info Scan)
+    $(info Scan)
     $(call infoshell, $(MAKE) -f make_tools.mk)
   endif
 endif
 
-ifeq ($(SCAN_DEPS),1)
+ifneq ($(NODEP),1)
   C_SRCS_IN := $(wildcard $(C_SUBDIR)/*.c $(C_SUBDIR)/*/*.c $(C_SUBDIR)/*/*/*.c)
   C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
   C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
@@ -298,7 +292,6 @@ endif
 # As a side effect, they're evaluated immediately instead of when the rule is invoked.
 # It doesn't look like $(shell) can be deferred so there might not be a better way.
 
-ifeq ($(SCAN_DEPS),1)
 ifeq ($(NODEP),1)
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.c
 ifeq (,$(KEEP_TEMPS))
@@ -380,7 +373,6 @@ $(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) -I include - | $(AS) $(ASFLAGS) -o $@
 else
 $(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o, $(src)),$(src))))
-endif
 endif
 
 # Linker script generation
