@@ -1,4 +1,5 @@
 # These rules catch most assets - some exceptions (see graphics_file_rules.mk)
+
 %.s: ;
 %.png: ;
 %.pal: ;

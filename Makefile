@@ -1,4 +1,16 @@
-# Caution when editing makefiles, tab/space whitespace is significant
+# The main rules to use in the make file:
+# - `make`: Builds the original ROM
+# - `make modern`: Builds the ROM using a modern toolchain
+# - `make clean`: Removes every build file except `tools` (use `make clean-tools`). May be the solution when you find an non-obvious error while building.
+# - `make compare`: Will check the ROM against a known dump to confirm if they are identical. Agbcc/Legacy ROM only.
+# Special variables can be set using `make <targets> VAR=value`:
+# - `DINFO=1`: Enables debug info on output files.
+# - `O_LEVEL=...`: (Default = 2) Set an optimisation level for the C compiler. Modern only. Refer to the GCC manual for more details.
+# - `NODEP=1`: FIXME: Not entirely sure what this does. Presumably: Build the ROM without verifying all assets exist. Increases build speed, but certain edits will not work.
+
+# Other tips:
+# - It's a good idea to `make` multiple things at once in line with your cpu core count. Use `make -jN <rules>`.
+# - Tabs and Spaces mean different things when editing makefiles - you should make indentation visible in your editor.
 
 # GBA rom header
 TITLE       := POKEMON EMER
@@ -110,7 +122,8 @@ else
   MODERNCC := $(PREFIX)gcc
   PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
   CC1              = $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
-  override CFLAGS += -mthumb -mthumb-interwork -O2 -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
+  O_LEVEL ?= 2
+  override CFLAGS += -mthumb -mthumb-interwork -O$(O_LEVEL) -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
   LIBPATH := -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libgcc.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libnosys.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libc.a))"
   LIB := $(LIBPATH) -lc -lnosys -lgcc -L../../libagbsyscall -lagbsyscall
 endif
@@ -133,7 +146,6 @@ RAMSCRGEN := $(TOOLS_DIR)/ramscrgen/ramscrgen$(EXE)
 FIX := $(TOOLS_DIR)/gbafix/gbafix$(EXE)
 MAPJSON := $(TOOLS_DIR)/mapjson/mapjson$(EXE)
 JSONPROC := $(TOOLS_DIR)/jsonproc/jsonproc$(EXE)
-
 PERL := perl
 
 MAKEFLAGS += --no-print-directory
@@ -152,20 +164,23 @@ RULES_NO_SCAN += clean-all clean clean-assets clean-assets-old tidy tidymodern t
 
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
-# Check if we need to scan dependencies based on the rule
+# Check if we need to scan dependencies based on the chosen rule OR user preference
 NODEP ?= 0
+# Check if we need to setup tools and generated assets based on the chosen rule.
+SETUP_PREREQS ?= 1
 ifneq (,$(MAKECMDGOALS))
   ifeq (,$(filter-out $(RULES_NO_SCAN),$(MAKECMDGOALS)))
     # $(info No Scan)
     NODEP := 1
+    SETUP_PREREQS := 0
   endif
 endif
-ifneq ($(NODEP),1)
-  # Default target or a rule requiring a scan.
+ifeq ($(SETUP_PREREQS),1)
+  # Set on: Default target, a rule requiring a scan, or manually turned off
   # $(info Scan)
-  # Forcibly execute `make tools` since we presumably need them for what we are doing.
+  # Forcibly execute `make tools` since we need them for what we are doing.
   $(call infoshell, $(MAKE) -f make_tools.mk)
-  # Oh and also generate sources
+  # Oh and also generate sources before we use `SCANINC` later on.
   $(call infoshell, $(MAKE) generated)
 endif
 
@@ -184,7 +199,7 @@ ifneq ($(NODEP),1)
   ASM_OBJS := $(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o,$(ASM_SRCS))
 
   # get all the data/*.s files EXCEPT the ones with specific rules
-  # TODO: Is this still needed?
+  # Some specific files are included in codegen_rules
   REGULAR_DATA_ASM_SRCS := $(filter-out $(DATA_ASM_SUBDIR)/maps.s $(DATA_ASM_SUBDIR)/map_events.s, $(wildcard $(DATA_ASM_SUBDIR)/*.s))
 
   DATA_ASM_SRCS := $(wildcard $(DATA_ASM_SUBDIR)/*.s)
@@ -200,11 +215,10 @@ ifneq ($(NODEP),1)
   OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
   SUBDIRS  := $(sort $(dir $(OBJS)))
-  # $(info ) good idea
   $(shell mkdir -p $(SUBDIRS))
 endif
 
-# Make rules
+# Main rules
 modern: all
 compare: all
 	@$(SHA1) rom.sha1
@@ -246,6 +260,7 @@ include spritesheet_rules.mk
 include audio_rules.mk
 include assets.mk
 
+# Note, if you do not have Make 4.4, there's no guarantee this will work correctly when making in parallel. You may need to run `make tools` first.
 generated: tools .WAIT $(AUTO_GEN_TARGETS)
 clean-generated:
 	-rm -f $(AUTO_GEN_TARGETS)
@@ -263,21 +278,21 @@ $(C_BUILDDIR)/record_mixing.o: CFLAGS += -ffreestanding
 $(C_BUILDDIR)/librfu_intr.o: CC1 := tools/agbcc/bin/agbcc_arm$(EXE)
 $(C_BUILDDIR)/librfu_intr.o: CFLAGS := -O2 -mthumb-interwork -quiet
 else
-$(C_BUILDDIR)/librfu_intr.o: CFLAGS := -mthumb-interwork -O2 -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
+$(C_BUILDDIR)/librfu_intr.o: CFLAGS := -Wno-pointer-to-int-cast
 $(C_BUILDDIR)/berry_crush.o: override CFLAGS += -Wno-address-of-packed-member
 endif
 
-# Add debug info to some files if flag set
+# Add debug info if flag set
 ifeq ($(DINFO),1)
   override CFLAGS += -g
 endif
 
-# FIXME: Word soup follows.
-
+# Dependency searching rules (*.c & .s)
 # The dep rules have to be explicit or else missing files won't be reported.
 # As a side effect, they're evaluated immediately instead of when the rule is invoked.
 # It doesn't look like $(shell) can be deferred so there might not be a better way.
 
+# C sources
 ifeq ($(NODEP),1)
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.c
 ifeq (,$(KEEP_TEMPS))
@@ -289,23 +304,6 @@ else
 	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
 	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
 endif
-else
-define C_DEP
-$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2)
-ifeq (,$$(KEEP_TEMPS))
-	@echo "$$(CC1) <flags> -o $$@ $$<"
-	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
-else
-	@$$(CPP) $$(CPPFLAGS) $$< -o $$(C_BUILDDIR)/$3.i
-	@$$(PREPROC) $$(C_BUILDDIR)/$3.i charmap.txt | $$(CC1) $$(CFLAGS) -o $$(C_BUILDDIR)/$3.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $$(C_BUILDDIR)/$3.s
-	$$(AS) $$(ASFLAGS) -o $$@ $$(C_BUILDDIR)/$3.s
-endif
-endef
-$(foreach src, $(C_SRCS), $(eval $(call C_DEP,$(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(src)),$(src),$(patsubst $(C_SUBDIR)/%.c,%,$(src)))))
-endif
-
-ifeq ($(NODEP),1)
 $(GFLIB_BUILDDIR)/%.o: $(GFLIB_SUBDIR)/%.c
 ifeq (,$(KEEP_TEMPS))
 	@echo "$(CC1) <flags> -o $@ $<"
@@ -317,23 +315,29 @@ else
 	$(AS) $(ASFLAGS) -o $@ $(GFLIB_BUILDDIR)/$*.s
 endif
 else
-define GFLIB_DEP
-$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2)
+define C_DEP
+$1: $2 $3 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2)
 ifeq (,$$(KEEP_TEMPS))
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
 else
-	@$$(CPP) $$(CPPFLAGS) $$< -o $$(GFLIB_BUILDDIR)/$3.i
-	@$$(PREPROC) $$(GFLIB_BUILDDIR)/$3.i charmap.txt | $$(CC1) $$(CFLAGS) -o $$(GFLIB_BUILDDIR)/$3.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $$(GFLIB_BUILDDIR)/$3.s
-	$$(AS) $$(ASFLAGS) -o $$@ $$(GFLIB_BUILDDIR)/$3.s
+	@$$(CPP) $$(CPPFLAGS) $$< -o $3/$4.i
+	@$$(PREPROC) $3/$4.i charmap.txt | $$(CC1) $$(CFLAGS) -o $3/$4.s
+	@echo -e ".text\n\t.align\t2, 0\n" >> $3/$4.s
+	$$(AS) $$(ASFLAGS) -o $$@ $3/$4.s
 endif
 endef
-$(foreach src, $(GFLIB_SRCS), $(eval $(call GFLIB_DEP,$(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o, $(src)),$(src),$(patsubst $(GFLIB_SUBDIR)/%.c,%, $(src)))))
+$(foreach src, $(C_SRCS), $(eval $(call C_DEP,$(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(src)),$(src),$(C_BUILDDIR),$(patsubst $(C_SUBDIR)/%.c,%,$(src)))))
+$(foreach src, $(GFLIB_SRCS), $(eval $(call C_DEP,$(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o, $(src)),$(src),$(GFLIB_BUILDDIR),$(patsubst $(GFLIB_SUBDIR)/%.c,%, $(src)))))
 endif
 
+# Assembly sources
 ifeq ($(NODEP),1)
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.s
+	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
+$(ASM_BUILDDIR)/%.o: $(ASM_SUBDIR)/%.s
+	$(AS) $(ASFLAGS) -o $@ $<
+$(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
 else
 define SRC_ASM_DATA_DEP
@@ -341,23 +345,12 @@ $1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I "" $2)
 	$$(PREPROC) $$< charmap.txt | $$(CPP) $(INCLUDE_FLAGS) - | $$(AS) $$(ASFLAGS) -o $$@
 endef
 $(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o, $(src)),$(src))))
-endif
-
-ifeq ($(NODEP),1)
-$(ASM_BUILDDIR)/%.o: $(ASM_SUBDIR)/%.s
-	$(AS) $(ASFLAGS) -o $@ $<
-else
 define ASM_DEP
 $1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I "" $2)
 	$$(AS) $$(ASFLAGS) -o $$@ $$<
 endef
 $(foreach src, $(ASM_SRCS), $(eval $(call ASM_DEP,$(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o, $(src)),$(src))))
-endif
 
-ifeq ($(NODEP),1)
-$(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
-	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
-else
 $(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o, $(src)),$(src))))
 endif
 

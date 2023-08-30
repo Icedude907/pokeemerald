@@ -1,3 +1,5 @@
+# This file contains numerous rules for graphics files that require special behaviour when compiling.
+
 CASTFORMGFXDIR := graphics/pokemon/castform
 TILESETGFXDIR := data/tilesets
 FONTGFXDIR := graphics/fonts

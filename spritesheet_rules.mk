@@ -1,3 +1,5 @@
+# This file contains numerous rules for graphics files (specifically spritesheets) that require special behaviour when compiling.
+
 OBJEVENTGFXDIR := graphics/object_events/pics
 FLDEFFGFXDIR := graphics/field_effects/pics
 

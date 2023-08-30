@@ -1,3 +1,5 @@
+# Controls building executables in the `tools` folder.
+# Can be invoked through the `Makefile` or standalone.
 
 MAKEFLAGS += --no-print-directory
 
