@@ -54,6 +54,8 @@ string read_text_file(string filepath) {
 }
 
 void write_text_file(path filepath, string text) {
+    auto dirs = filepath;
+    std::filesystem::create_directories(dirs.remove_filename());
     ofstream out_file(filepath, std::ofstream::binary);
 
     if (!out_file.is_open())

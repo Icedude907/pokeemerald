@@ -95,8 +95,9 @@ MID_BUILDDIR = $(OBJ_DIR)/$(MID_SUBDIR)
 ASFLAGS := -mcpu=arm7tdmi --defsym MODERN=$(MODERN)
 LDFLAGS := -Map ../../$(MAP)
 
-INCLUDE_DIRS := include
+INCLUDE_DIRS := include $(ASSETS_OBJ_DIR)/include
 INCLUDE_CPP := $(INCLUDE_DIRS:%=-iquote %)
+INCLUDE_FLAGS = $(INCLUDE_DIRS:%=-I %)
 
 CPPFLAGS := $(INCLUDE_CPP) -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN)
 ifeq ($(MODERN),0)
@@ -117,8 +118,11 @@ endif
 # Default rule
 all: rom
 
-# Tool Executables
+# C files to be created in assets/include/generated
+AUTO_GEN_TARGETS :=
 include make_tools.mk
+include codegen_rules.mk
+# Tool Executables
 SHA1 := $(shell { command -v sha1sum || command -v shasum; } 2>/dev/null) -c
 GFX := $(TOOLS_DIR)/gbagfx/gbagfx$(EXE)
 AIF := $(TOOLS_DIR)/aif2pcm/aif2pcm$(EXE)
@@ -135,7 +139,7 @@ PERL := perl
 MAKEFLAGS += --no-print-directory
 
 # Special targets
-RULES_NO_SCAN += clean-all clean clean-assets clean-assets-old tidy tidymodern tidynonmodern libagbsyscall
+RULES_NO_SCAN += clean-all clean clean-assets clean-assets-old tidy tidymodern tidynonmodern libagbsyscall generated clean-generated
 .PHONY: all rom modern compare
 .PHONY: $(RULES_NO_SCAN)
 
@@ -152,7 +156,7 @@ infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst 
 NODEP ?= 0
 ifneq (,$(MAKECMDGOALS))
   ifeq (,$(filter-out $(RULES_NO_SCAN),$(MAKECMDGOALS)))
-    $(info No Scan )
+    # $(info No Scan)
     NODEP := 1
   endif
 endif
@@ -161,6 +165,8 @@ ifneq ($(NODEP),1)
   # $(info Scan)
   # Forcibly execute `make tools` since we presumably need them for what we are doing.
   $(call infoshell, $(MAKE) -f make_tools.mk)
+  # Oh and also generate sources
+  $(call infoshell, $(MAKE) generated)
 endif
 
 ifneq ($(NODEP),1)
@@ -171,13 +177,14 @@ ifneq ($(NODEP),1)
   GFLIB_SRCS := $(wildcard $(GFLIB_SUBDIR)/*.c)
   GFLIB_OBJS := $(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o,$(GFLIB_SRCS))
 
-  C_ASM_SRCS += $(wildcard $(C_SUBDIR)/*.s $(C_SUBDIR)/*/*.s $(C_SUBDIR)/*/*/*.s)
+  C_ASM_SRCS := $(wildcard $(C_SUBDIR)/*.s $(C_SUBDIR)/*/*.s $(C_SUBDIR)/*/*/*.s)
   C_ASM_OBJS := $(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o,$(C_ASM_SRCS))
 
   ASM_SRCS := $(wildcard $(ASM_SUBDIR)/*.s)
   ASM_OBJS := $(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o,$(ASM_SRCS))
 
   # get all the data/*.s files EXCEPT the ones with specific rules
+  # TODO: Is this still needed?
   REGULAR_DATA_ASM_SRCS := $(filter-out $(DATA_ASM_SUBDIR)/maps.s $(DATA_ASM_SUBDIR)/map_events.s, $(wildcard $(DATA_ASM_SUBDIR)/*.s))
 
   DATA_ASM_SRCS := $(wildcard $(DATA_ASM_SUBDIR)/*.s)
@@ -197,9 +204,6 @@ ifneq ($(NODEP),1)
   $(shell mkdir -p $(SUBDIRS))
 endif
 
-# Stub for `json_data_rules.mk`
-AUTO_GEN_TARGETS :=
-
 # Make rules
 modern: all
 compare: all
@@ -216,11 +220,6 @@ clean: tidy clean-assets
 
 clean-assets:
 	-rm -rf $(ASSETS_OBJ_DIR)
-	@echo "AUTO_GEN_TARGETS: $(AUTO_GEN_TARGETS)"
-	-rm -f $(AUTO_GEN_TARGETS)
-	-rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
-	-rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc
-	-find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
 # To be used for those upgrading from before the `build/assets` switch
 clean-assets-old:
@@ -242,11 +241,14 @@ tidymodern:
 	-rm -f $(MODERN_ROM_NAME) $(MODERN_ROM_NAME:.gba=.elf) $(MODERN_ROM_NAME:.gba=.map)
 	-rm -rf $(MODERN_OBJ_DIR_NAME)
 
-include codegen_rules.mk
 include graphics_rules.mk
 include spritesheet_rules.mk
 include audio_rules.mk
 include assets.mk
+
+generated: tools .WAIT $(AUTO_GEN_TARGETS)
+clean-generated:
+	-rm -f $(AUTO_GEN_TARGETS)
 
 # Modify build flags for some files.
 ifeq ($(MODERN),0)
@@ -289,7 +291,7 @@ else
 endif
 else
 define C_DEP
-$1: $2 $$(shell $(SCANINC) -I include -I tools/agbcc/include -I gflib $2)
+$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2)
 ifeq (,$$(KEEP_TEMPS))
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
@@ -304,7 +306,7 @@ $(foreach src, $(C_SRCS), $(eval $(call C_DEP,$(patsubst $(C_SUBDIR)/%.c,$(C_BUI
 endif
 
 ifeq ($(NODEP),1)
-$(GFLIB_BUILDDIR)/%.o: $(GFLIB_SUBDIR)/%.c $$(c_dep)
+$(GFLIB_BUILDDIR)/%.o: $(GFLIB_SUBDIR)/%.c
 ifeq (,$(KEEP_TEMPS))
 	@echo "$(CC1) <flags> -o $@ $<"
 	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) $< charmap.txt -i | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
@@ -316,7 +318,7 @@ else
 endif
 else
 define GFLIB_DEP
-$1: $2 $$(shell $(SCANINC) -I include -I tools/agbcc/include -I gflib $2)
+$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2)
 ifeq (,$$(KEEP_TEMPS))
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
@@ -332,11 +334,11 @@ endif
 
 ifeq ($(NODEP),1)
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.s
-	$(PREPROC) $< charmap.txt | $(CPP) -I include - | $(AS) $(ASFLAGS) -o $@
+	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
 else
 define SRC_ASM_DATA_DEP
-$1: $2 $$(shell $(SCANINC) -I include -I "" $2)
-	$$(PREPROC) $$< charmap.txt | $$(CPP) -I include - | $$(AS) $$(ASFLAGS) -o $$@
+$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I "" $2)
+	$$(PREPROC) $$< charmap.txt | $$(CPP) $(INCLUDE_FLAGS) - | $$(AS) $$(ASFLAGS) -o $$@
 endef
 $(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o, $(src)),$(src))))
 endif
@@ -346,7 +348,7 @@ $(ASM_BUILDDIR)/%.o: $(ASM_SUBDIR)/%.s
 	$(AS) $(ASFLAGS) -o $@ $<
 else
 define ASM_DEP
-$1: $2 $$(shell $(SCANINC) -I include -I "" $2)
+$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I "" $2)
 	$$(AS) $$(ASFLAGS) -o $$@ $$<
 endef
 $(foreach src, $(ASM_SRCS), $(eval $(call ASM_DEP,$(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o, $(src)),$(src))))
@@ -354,7 +356,7 @@ endif
 
 ifeq ($(NODEP),1)
 $(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
-	$(PREPROC) $< charmap.txt | $(CPP) -I include - | $(AS) $(ASFLAGS) -o $@
+	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
 else
 $(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o, $(src)),$(src))))
 endif

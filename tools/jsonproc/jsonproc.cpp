@@ -12,6 +12,9 @@ using std::string; using std::to_string;
 #include <algorithm>
 using std::replace_if;
 
+#include <filesystem>
+using std::filesystem::path;
+
 #include <inja.hpp>
 using namespace inja;
 using json = nlohmann::json;
@@ -35,7 +38,7 @@ int main(int argc, char *argv[])
 
     string jsonfilepath = argv[1];
     string templateFilepath = argv[2];
-    string outputFilepath = argv[3];
+    path outputFilepath = argv[3];
 
     Environment env;
     env.set_trim_blocks(true);
@@ -119,7 +122,10 @@ int main(int argc, char *argv[])
 
     try
     {
-        env.write_with_json_file(templateFilepath, jsonfilepath, outputFilepath);
+        // Mkdir if not
+        auto dirs = outputFilepath;
+        std::filesystem::create_directories(dirs.remove_filename());
+        env.write_with_json_file(templateFilepath, jsonfilepath, outputFilepath.string());
     }
     catch (const std::exception& e)
     {

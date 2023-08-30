@@ -6,7 +6,7 @@ Thumbs.db
 # Tools
 .idea/
 .vscode/
-porymap.*.cfg
+porymap*
 
 # Emulation Files
 *.sgm
