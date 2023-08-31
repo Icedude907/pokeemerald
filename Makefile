@@ -7,6 +7,7 @@
 # - `DINFO=1`: Enables debug info on output files.
 # - `O_LEVEL=...`: (Default = 2) Set an optimisation level for the C compiler. Modern only. Refer to the GCC manual for more details.
 # - `NODEP=1`: FIXME: Not entirely sure what this does. Presumably: Build the ROM without verifying all assets exist. Increases build speed, but certain edits will not work.
+# - `KEEP_TEMPS=1`: Will keep the temporary files created during the C preprocessing step.
 
 # Other tips:
 # - It's a good idea to `make` multiple things at once in line with your cpu core count. Use `make -jN <rules>`.
@@ -143,7 +144,7 @@ MID := $(TOOLS_DIR)/mid2agb/mid2agb$(EXE)
 SCANINC := $(TOOLS_DIR)/scaninc/scaninc$(EXE)
 PREPROC := $(TOOLS_DIR)/preproc/preproc$(EXE)
 RAMSCRGEN := $(TOOLS_DIR)/ramscrgen/ramscrgen$(EXE)
-FIX := $(TOOLS_DIR)/gbafix/gbafix$(EXE)
+GBAFIX := $(TOOLS_DIR)/gbafix/gbafix$(EXE)
 MAPJSON := $(TOOLS_DIR)/mapjson/mapjson$(EXE)
 JSONPROC := $(TOOLS_DIR)/jsonproc/jsonproc$(EXE)
 PERL := perl
@@ -177,7 +178,7 @@ ifneq (,$(MAKECMDGOALS))
 endif
 ifeq ($(SETUP_PREREQS),1)
   # Set on: Default target, a rule requiring a scan, or manually turned off
-  # $(info Scan)
+  $(info Making tools and generating includes...)
   # Forcibly execute `make tools` since we need them for what we are doing.
   $(call infoshell, $(MAKE) -f make_tools.mk)
   # Oh and also generate sources before we use `SCANINC` later on.
@@ -185,6 +186,7 @@ ifeq ($(SETUP_PREREQS),1)
 endif
 
 ifneq ($(NODEP),1)
+  $(info Collecting sources...)
   C_SRCS_IN := $(wildcard $(C_SUBDIR)/*.c $(C_SUBDIR)/*/*.c $(C_SUBDIR)/*/*/*.c)
   C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
   C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
@@ -216,6 +218,7 @@ ifneq ($(NODEP),1)
 
   SUBDIRS  := $(sort $(dir $(OBJS)))
   $(shell mkdir -p $(SUBDIRS))
+  $(info Collecting sources complete!)
 endif
 
 # Main rules
@@ -288,9 +291,6 @@ ifeq ($(DINFO),1)
 endif
 
 # Dependency searching rules (*.c & .s)
-# The dep rules have to be explicit or else missing files won't be reported.
-# As a side effect, they're evaluated immediately instead of when the rule is invoked.
-# It doesn't look like $(shell) can be deferred so there might not be a better way.
 
 # C sources
 ifeq ($(NODEP),1)
@@ -316,7 +316,7 @@ else
 endif
 else
 define C_DEP
-$1: $2 $3 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2)
+$1: $2 $3 $1.d
 ifeq (,$$(KEEP_TEMPS))
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
@@ -326,9 +326,17 @@ else
 	@echo -e ".text\n\t.align\t2, 0\n" >> $3/$4.s
 	$$(AS) $$(ASFLAGS) -o $$@ $3/$4.s
 endif
+
+$1.d: $2
+	$(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib -M $2 > $1.d
+# Makefiles are jank. This will be missing at the start, made during the first run, then included, and the makefile will auto-rerun. Very nice
+include $1.d
+
 endef
+$(info Creating make rules for C files and verifying their includes. This will take a while...)
 $(foreach src, $(C_SRCS), $(eval $(call C_DEP,$(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(src)),$(src),$(C_BUILDDIR),$(patsubst $(C_SUBDIR)/%.c,%,$(src)))))
 $(foreach src, $(GFLIB_SRCS), $(eval $(call C_DEP,$(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o, $(src)),$(src),$(GFLIB_BUILDDIR),$(patsubst $(GFLIB_SUBDIR)/%.c,%, $(src)))))
+$(info Finished creating make rules for C files!)
 endif
 
 # Assembly sources
@@ -341,17 +349,24 @@ $(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
 else
 define SRC_ASM_DATA_DEP
-$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I "" $2)
+$1: $2
 	$$(PREPROC) $$< charmap.txt | $$(CPP) $(INCLUDE_FLAGS) - | $$(AS) $$(ASFLAGS) -o $$@
+$1.d: $2
+	$(SCANINC) $(INCLUDE_FLAGS) -I "" -M $2 > $1.d
+include $1.d
 endef
-$(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o, $(src)),$(src))))
 define ASM_DEP
-$1: $2 $$(shell $(SCANINC) $(INCLUDE_FLAGS) -I "" $2)
+$1: $2
 	$$(AS) $$(ASFLAGS) -o $$@ $$<
+$1.d: $2
+	$(SCANINC) $(INCLUDE_FLAGS) -I "" -M $2 > $1.d > $1.d
+include $1.d
 endef
+$(info Creating make rules for ASM files and verifying their includes. This will take a while...)
+$(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o, $(src)),$(src))))
 $(foreach src, $(ASM_SRCS), $(eval $(call ASM_DEP,$(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o, $(src)),$(src))))
-
 $(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o, $(src)),$(src))))
+$(info Finished creating make rules for ASM files!)
 endif
 
 # Linker script generation
@@ -382,12 +397,12 @@ libagbsyscall:
 $(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
 	@echo "cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T ld_script.ld -o ../../$@ <objects> <lib>"
 	@cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T ld_script.ld -o ../../$@ $(OBJS_REL) $(LIB)
-	$(FIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
+	$(GBAFIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
 
 # Building the ROM
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
-	$(FIX) $@ -p --silent
+	$(GBAFIX) $@ -p --silent
 
 # Symbol file (`make syms`)
 $(SYM): $(ELF)

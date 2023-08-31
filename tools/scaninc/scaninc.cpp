@@ -24,6 +24,7 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <iostream>
 #include "scaninc.h"
 #include "source_file.h"
 
@@ -47,6 +48,8 @@ int main(int argc, char **argv)
 
     std::vector<std::string> includeDirs;
 
+    bool makeformat = false;
+
     argc--;
     argv++;
 
@@ -67,6 +70,10 @@ int main(int argc, char **argv)
                 includeDir += '/';
             }
             includeDirs.push_back(includeDir);
+        }
+        else if(arg.substr(0, 2) == "-M")
+        {
+            makeformat = true;
         }
         else
         {
@@ -121,8 +128,20 @@ int main(int argc, char **argv)
         includeDirs.pop_back();
     }
 
-    for (const std::string &path : dependencies)
+    if(makeformat)
     {
-        std::printf("%s\n", path.c_str());
+        std::printf("%s: ", initialPath.c_str());
+        for (const std::string &path : dependencies)
+        {
+            std::printf("%s ", path.c_str());
+        }
     }
+    else
+    {
+        for (const std::string &path : dependencies)
+        {
+            std::printf("%s\n", path.c_str());
+        }
+    }
+    std::cout << std::endl;
 }
