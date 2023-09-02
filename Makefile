@@ -106,7 +106,6 @@ MID_BUILDDIR = $(OBJ_DIR)/$(MID_SUBDIR)
 
 # Flags
 ASFLAGS := -mcpu=arm7tdmi --defsym MODERN=$(MODERN)
-LDFLAGS := -Map ../../$(MAP)
 
 INCLUDE_DIRS := include $(ASSETS_OBJ_DIR)/include
 INCLUDE_CPP := $(INCLUDE_DIRS:%=-iquote %)
@@ -162,7 +161,7 @@ RULES_NO_SCAN += clean-all clean clean-assets clean-assets-old tidy tidymodern t
 .SECONDARY:
 # Delete files that weren't built properly
 .DELETE_ON_ERROR:
-
+# Prints the results of a shell command to the console as it is executed
 infoshell = $(foreach line, $(shell $1 | sed "s/ /__SPACE__/g"), $(info $(subst __SPACE__, ,$(line))))
 
 # Check if we need to scan dependencies based on the chosen rule OR user preference
@@ -299,104 +298,102 @@ ifeq (,$(KEEP_TEMPS))
 	@echo "$(CC1) <flags> -o $@ $<"
 	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) $< charmap.txt -i | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
 else
-	@$(CPP) $(CPPFLAGS) $< -o $(C_BUILDDIR)/$*.i
-	@$(PREPROC) $(C_BUILDDIR)/$*.i charmap.txt | $(CC1) $(CFLAGS) -o $(C_BUILDDIR)/$*.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $(C_BUILDDIR)/$*.s
-	$(AS) $(ASFLAGS) -o $@ $(C_BUILDDIR)/$*.s
+	@$(CPP) $(CPPFLAGS) $< -o $(@:%.o=%.i)
+	@$(PREPROC) $(@:%.o=%.i) charmap.txt | $(CC1) $(CFLAGS) -o $(@:%.o=%.s)
+	@echo -e ".text\n\t.align\t2, 0\n" >> $(@:%.o=%.s)
+	$(AS) $(ASFLAGS) -o $@ $(@:%.o=%.s)
 endif
 $(GFLIB_BUILDDIR)/%.o: $(GFLIB_SUBDIR)/%.c
 ifeq (,$(KEEP_TEMPS))
 	@echo "$(CC1) <flags> -o $@ $<"
 	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) $< charmap.txt -i | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
 else
-	@$(CPP) $(CPPFLAGS) $< -o $(GFLIB_BUILDDIR)/$*.i
-	@$(PREPROC) $(GFLIB_BUILDDIR)/$*.i charmap.txt | $(CC1) $(CFLAGS) -o $(GFLIB_BUILDDIR)/$*.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $(GFLIB_BUILDDIR)/$*.s
-	$(AS) $(ASFLAGS) -o $@ $(GFLIB_BUILDDIR)/$*.s
+	@$(CPP) $(CPPFLAGS) $< -o $(@:%.o=%.i)
+	@$(PREPROC) $(@:%.o=%.i) charmap.txt | $(CC1) $(CFLAGS) -o $(@:%.o=%.s)
+	@echo -e ".text\n\t.align\t2, 0\n" >> $(@:%.o=%.s)
+	$(AS) $(ASFLAGS) -o $@ $(@:%.o=%.s)
 endif
 else
+# Args: $1 = Output path (build/assets), $2 = Input file (src/data.c)
+# Generates: $3 Input file noext, $4 Temp Assets Path
 define C_DEP
-$1: $2 $3 $1.d
+$(eval $(call C_DEP_IMPL,$1,$2,$1/$(2:%.c=%),$1/$(2:%.c=%)))
+endef
+# $(info $1, $2, $3, $4)
+define C_DEP_IMPL
+$3.o: $2 $3.d
 ifeq (,$$(KEEP_TEMPS))
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
 else
-	@$$(CPP) $$(CPPFLAGS) $$< -o $3/$4.i
-	@$$(PREPROC) $3/$4.i charmap.txt | $$(CC1) $$(CFLAGS) -o $3/$4.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $3/$4.s
-	$$(AS) $$(ASFLAGS) -o $$@ $3/$4.s
+	@$$(CPP) $$(CPPFLAGS) $$< -o $4.i
+	@$$(PREPROC) $4.i charmap.txt | $$(CC1) $$(CFLAGS) -o $4.s
+	@echo -e ".text\n\t.align\t2, 0\n" >> $4.s
+	$$(AS) $$(ASFLAGS) -o $$@ $4.s
 endif
-
-$1.d: $2
-	$(SCANINC) $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib -M $2 > $1.d
-# Makefiles are jank. This will be missing at the start, made during the first run, then included, and the makefile will auto-rerun. Very nice
-include $1.d
-
+$3.d: $2
+	$(SCANINC) -M $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2 > $3.d
+include $3.d
 endef
-$(info Creating make rules for C files and verifying their includes. This will take a while...)
-$(foreach src, $(C_SRCS), $(eval $(call C_DEP,$(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(src)),$(src),$(C_BUILDDIR),$(patsubst $(C_SUBDIR)/%.c,%,$(src)))))
-$(foreach src, $(GFLIB_SRCS), $(eval $(call C_DEP,$(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o, $(src)),$(src),$(GFLIB_BUILDDIR),$(patsubst $(GFLIB_SUBDIR)/%.c,%, $(src)))))
-$(info Finished creating make rules for C files!)
+$(info Creating make rules for C files.)
+$(foreach src,$(C_SRCS),$(call C_DEP,$(OBJ_DIR),$(src)))
+$(foreach src,$(GFLIB_SRCS),$(call C_DEP,$(OBJ_DIR),$(src)))
 endif
 
 # Assembly sources
 ifeq ($(NODEP),1)
 $(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
-$(ASM_BUILDDIR)/%.o: $(ASM_SUBDIR)/%.s
-	$(AS) $(ASFLAGS) -o $@ $<
 $(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
 	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
+$(ASM_BUILDDIR)/%.o: $(ASM_SUBDIR)/%.s
+	$(AS) $(ASFLAGS) -o $@ $<
 else
 define SRC_ASM_DATA_DEP
-$1: $2
+$1.o: $2
 	$$(PREPROC) $$< charmap.txt | $$(CPP) $(INCLUDE_FLAGS) - | $$(AS) $$(ASFLAGS) -o $$@
 $1.d: $2
-	$(SCANINC) $(INCLUDE_FLAGS) -I "" -M $2 > $1.d
+	$(SCANINC) -M $(INCLUDE_FLAGS) -I "" $2 > $1.d
 include $1.d
 endef
 define ASM_DEP
-$1: $2
+$1.o: $2
 	$$(AS) $$(ASFLAGS) -o $$@ $$<
 $1.d: $2
-	$(SCANINC) $(INCLUDE_FLAGS) -I "" -M $2 > $1.d > $1.d
+	$(SCANINC) -M $(INCLUDE_FLAGS) -I "" $2 > $1.d
 include $1.d
 endef
-$(info Creating make rules for ASM files and verifying their includes. This will take a while...)
-$(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o, $(src)),$(src))))
-$(foreach src, $(ASM_SRCS), $(eval $(call ASM_DEP,$(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o, $(src)),$(src))))
-$(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o, $(src)),$(src))))
-$(info Finished creating make rules for ASM files!)
+$(info Creating make rules for ASM files.)
+$(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(src:%.s=$(OBJ_DIR)/%),$(src))))
+$(foreach src, $(ASM_SRCS), $(eval $(call ASM_DEP,$(src:%.s=$(OBJ_DIR)/%),$(src))))
+$(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(src:%.s=$(OBJ_DIR)/%),$(src))))
 endif
 
 # Linker script generation
 $(OBJ_DIR)/sym_bss.ld: sym_bss.txt
 	$(RAMSCRGEN) .bss $< ENGLISH > $@
-
 $(OBJ_DIR)/sym_common.ld: sym_common.txt $(C_OBJS) $(wildcard common_syms/*.txt)
 	$(RAMSCRGEN) COMMON $< ENGLISH -c $(C_BUILDDIR),common_syms > $@
-
 $(OBJ_DIR)/sym_ewram.ld: sym_ewram.txt
 	$(RAMSCRGEN) ewram_data $< ENGLISH > $@
 
+LD_SCRIPT_DEPS :=
+LD_SCRIPT := ld_script_modern.ld
 ifeq ($(MODERN),0)
   LD_SCRIPT := ld_script.ld
   LD_SCRIPT_DEPS := $(OBJ_DIR)/sym_bss.ld $(OBJ_DIR)/sym_common.ld $(OBJ_DIR)/sym_ewram.ld
-else
-  LD_SCRIPT := ld_script_modern.ld
-  LD_SCRIPT_DEPS :=
 endif
 
 $(OBJ_DIR)/ld_script.ld: $(LD_SCRIPT) $(LD_SCRIPT_DEPS)
-	cd $(OBJ_DIR) && sed "s#tools/#../../tools/#g" ../../$(LD_SCRIPT) > ld_script.ld
+	sed "s#tools/#tools/#g" $(LD_SCRIPT) > $(OBJ_DIR)/ld_script.ld
 
 # GBA .elf
 libagbsyscall:
 	@$(MAKE) -C libagbsyscall TOOLCHAIN=$(TOOLCHAIN) MODERN=$(MODERN)
 
 $(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
-	@echo "cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T ld_script.ld -o ../../$@ <objects> <lib>"
-	@cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T ld_script.ld -o ../../$@ $(OBJS_REL) $(LIB)
+	@echo "cd $(OBJ_DIR) && $(LD) -Map ../../$(MAP) -T ld_script.ld -o ../../$@ <objects> <lib>"
+	@cd $(OBJ_DIR) && $(LD) -Map ../../$(MAP) -T ld_script.ld -o ../../$@ $(OBJS_REL) $(LIB)
 	$(GBAFIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
 
 # Building the ROM
