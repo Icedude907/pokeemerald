@@ -6,7 +6,7 @@
 # Special variables can be set using `make <targets> VAR=value`:
 # - `DINFO=1`: Enables debug info on output files.
 # - `O_LEVEL=...`: (Default = 2) Set an optimisation level for the C compiler. Modern only. Refer to the GCC manual for more details.
-# - `NODEP=1`: FIXME: Not entirely sure what this does. Presumably: Build the ROM without verifying all assets exist. Increases build speed, but certain edits will not work.
+# - `NODEP=1`: Speeds up builds by not scanning dependencies. Must have done a complete build prior. Modifying assets will not work.
 # - `KEEP_TEMPS=1`: Will keep the temporary files created during the C preprocessing step.
 
 # Other tips:
@@ -53,7 +53,7 @@ ifeq ($(OS),Windows_NT)
   EXE := .exe
 endif
 
-# Pick C++ preprocessor
+# Pick C preprocessor
 CPP := $(PREFIX)cpp
 ifeq ($(MODERN),0)
   ifneq ($(shell uname -s),Darwin)
@@ -73,7 +73,7 @@ LEGACY_OBJ_DIR_NAME := $(BUILD_DIR)/emerald
 MODERN_ROM_NAME := $(FILE_NAME)_modern.gba
 MODERN_OBJ_DIR_NAME := $(BUILD_DIR)/modern
 
-# Shared dir for asset files, (not finalised .o files).
+# Shared dir for assets (not .o files).
 ASSETS_OBJ_DIR := $(BUILD_DIR)/assets
 
 # Pick our chosen variables
@@ -113,15 +113,15 @@ INCLUDE_FLAGS = $(INCLUDE_DIRS:%=-I %)
 
 CPPFLAGS := $(INCLUDE_CPP) -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=$(MODERN)
 ifeq ($(MODERN),0)
-  CC1             := tools/agbcc/bin/agbcc$(EXE)
+  CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef
+  CC1 := tools/agbcc/bin/agbcc$(EXE)
   override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -O2 -fhex-asm -g
   LIBPATH := -L ../../tools/agbcc/lib
   LIB := $(LIBPATH) -lgcc -lc -L../../libagbsyscall -lagbsyscall
-  CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef
 else
   MODERNCC := $(PREFIX)gcc
   PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
-  CC1              = $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
+  CC1 := $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
   O_LEVEL ?= 2
   override CFLAGS += -mthumb -mthumb-interwork -O$(O_LEVEL) -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
   LIBPATH := -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libgcc.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libnosys.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libc.a))"
@@ -184,41 +184,38 @@ ifeq ($(SETUP_PREREQS),1)
   $(call infoshell, $(MAKE) generated)
 endif
 
-ifneq ($(NODEP),1)
-  $(info Collecting sources...)
-  C_SRCS_IN := $(wildcard $(C_SUBDIR)/*.c $(C_SUBDIR)/*/*.c $(C_SUBDIR)/*/*/*.c)
-  C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
-  C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
+# Source collection
+C_SRCS_IN := $(wildcard $(C_SUBDIR)/*.c $(C_SUBDIR)/*/*.c $(C_SUBDIR)/*/*/*.c)
+C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
+C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
 
-  GFLIB_SRCS := $(wildcard $(GFLIB_SUBDIR)/*.c)
-  GFLIB_OBJS := $(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o,$(GFLIB_SRCS))
+GFLIB_SRCS := $(wildcard $(GFLIB_SUBDIR)/*.c)
+GFLIB_OBJS := $(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o,$(GFLIB_SRCS))
 
-  C_ASM_SRCS := $(wildcard $(C_SUBDIR)/*.s $(C_SUBDIR)/*/*.s $(C_SUBDIR)/*/*/*.s)
-  C_ASM_OBJS := $(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o,$(C_ASM_SRCS))
+C_ASM_SRCS := $(wildcard $(C_SUBDIR)/*.s $(C_SUBDIR)/*/*.s $(C_SUBDIR)/*/*/*.s)
+C_ASM_OBJS := $(patsubst $(C_SUBDIR)/%.s,$(C_BUILDDIR)/%.o,$(C_ASM_SRCS))
 
-  ASM_SRCS := $(wildcard $(ASM_SUBDIR)/*.s)
-  ASM_OBJS := $(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o,$(ASM_SRCS))
+ASM_SRCS := $(wildcard $(ASM_SUBDIR)/*.s)
+ASM_OBJS := $(patsubst $(ASM_SUBDIR)/%.s,$(ASM_BUILDDIR)/%.o,$(ASM_SRCS))
 
-  # get all the data/*.s files EXCEPT the ones with specific rules
-  # Some specific files are included in codegen_rules
-  REGULAR_DATA_ASM_SRCS := $(filter-out $(DATA_ASM_SUBDIR)/maps.s $(DATA_ASM_SUBDIR)/map_events.s, $(wildcard $(DATA_ASM_SUBDIR)/*.s))
+# get all the data/*.s files EXCEPT the ones with specific rules
+# Some specific files are included in codegen_rules
+REGULAR_DATA_ASM_SRCS := $(filter-out $(DATA_ASM_SUBDIR)/maps.s $(DATA_ASM_SUBDIR)/map_events.s, $(wildcard $(DATA_ASM_SUBDIR)/*.s))
 
-  DATA_ASM_SRCS := $(wildcard $(DATA_ASM_SUBDIR)/*.s)
-  DATA_ASM_OBJS := $(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o,$(DATA_ASM_SRCS))
+DATA_ASM_SRCS := $(wildcard $(DATA_ASM_SUBDIR)/*.s)
+DATA_ASM_OBJS := $(patsubst $(DATA_ASM_SUBDIR)/%.s,$(DATA_ASM_BUILDDIR)/%.o,$(DATA_ASM_SRCS))
 
-  SONG_SRCS := $(wildcard $(SONG_SUBDIR)/*.s)
-  SONG_OBJS := $(patsubst $(SONG_SUBDIR)/%.s,$(SONG_BUILDDIR)/%.o,$(SONG_SRCS))
+SONG_SRCS := $(wildcard $(SONG_SUBDIR)/*.s)
+SONG_OBJS := $(patsubst $(SONG_SUBDIR)/%.s,$(SONG_BUILDDIR)/%.o,$(SONG_SRCS))
 
-  MID_SRCS := $(wildcard $(MID_SUBDIR)/*.mid)
-  MID_OBJS := $(patsubst $(MID_SUBDIR)/%.mid,$(MID_BUILDDIR)/%.o,$(MID_SRCS))
+MID_SRCS := $(wildcard $(MID_SUBDIR)/*.mid)
+MID_OBJS := $(patsubst $(MID_SUBDIR)/%.mid,$(MID_BUILDDIR)/%.o,$(MID_SRCS))
 
-  OBJS     := $(C_OBJS) $(GFLIB_OBJS) $(C_ASM_OBJS) $(ASM_OBJS) $(DATA_ASM_OBJS) $(SONG_OBJS) $(MID_OBJS)
-  OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
+OBJS     := $(C_OBJS) $(GFLIB_OBJS) $(C_ASM_OBJS) $(ASM_OBJS) $(DATA_ASM_OBJS) $(SONG_OBJS) $(MID_OBJS)
+OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
-  SUBDIRS  := $(sort $(dir $(OBJS)))
-  $(shell mkdir -p $(SUBDIRS))
-  $(info Collecting sources complete!)
-endif
+SUBDIRS  := $(sort $(dir $(OBJS)))
+$(call infoshell, mkdir -p $(SUBDIRS))
 
 # Main rules
 modern: all
@@ -280,7 +277,8 @@ $(C_BUILDDIR)/record_mixing.o: CFLAGS += -ffreestanding
 $(C_BUILDDIR)/librfu_intr.o: CC1 := tools/agbcc/bin/agbcc_arm$(EXE)
 $(C_BUILDDIR)/librfu_intr.o: CFLAGS := -O2 -mthumb-interwork -quiet
 else
-$(C_BUILDDIR)/librfu_intr.o: CFLAGS := -Wno-pointer-to-int-cast
+# need advice here. Is this needed?
+$(C_BUILDDIR)/librfu_intr.o: CFLAGS := -mthumb-interwork -O$(O_LEVEL) -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
 $(C_BUILDDIR)/berry_crush.o: override CFLAGS += -Wno-address-of-packed-member
 endif
 
@@ -291,82 +289,74 @@ endif
 
 # Dependency searching rules (*.c & .s)
 
-# C sources
-ifeq ($(NODEP),1)
-$(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.c
-ifeq (,$(KEEP_TEMPS))
-	@echo "$(CC1) <flags> -o $@ $<"
-	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) $< charmap.txt -i | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
-else
-	@$(CPP) $(CPPFLAGS) $< -o $(@:%.o=%.i)
-	@$(PREPROC) $(@:%.o=%.i) charmap.txt | $(CC1) $(CFLAGS) -o $(@:%.o=%.s)
-	@echo -e ".text\n\t.align\t2, 0\n" >> $(@:%.o=%.s)
-	$(AS) $(ASFLAGS) -o $@ $(@:%.o=%.s)
-endif
-$(GFLIB_BUILDDIR)/%.o: $(GFLIB_SUBDIR)/%.c
-ifeq (,$(KEEP_TEMPS))
-	@echo "$(CC1) <flags> -o $@ $<"
-	@$(CPP) $(CPPFLAGS) $< | $(PREPROC) $< charmap.txt -i | $(CC1) $(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $(AS) $(ASFLAGS) -o $@ -
-else
-	@$(CPP) $(CPPFLAGS) $< -o $(@:%.o=%.i)
-	@$(PREPROC) $(@:%.o=%.i) charmap.txt | $(CC1) $(CFLAGS) -o $(@:%.o=%.s)
-	@echo -e ".text\n\t.align\t2, 0\n" >> $(@:%.o=%.s)
-	$(AS) $(ASFLAGS) -o $@ $(@:%.o=%.s)
-endif
-else
-# Args: $1 = Output path (build/assets), $2 = Input file (src/data.c)
-# Generates: $3 Input file noext, $4 Temp Assets Path
+# Args: $1 = Output file without extension (build/assets/src/data), $2 = Input file (src/data.c)
 define C_DEP
-$(eval $(call C_DEP_IMPL,$1,$2,$1/$(2:%.c=%),$1/$(2:%.c=%)))
+$(call C_DEP_IMPL,$1,$2,$3)
 endef
-# $(info $1, $2, $3, $4)
+# $1: Output file without extension, $2 input file, $3 temp path
 define C_DEP_IMPL
-$3.o: $2 $3.d
-ifeq (,$$(KEEP_TEMPS))
+$1.o: $2
+ifeq (,$(KEEP_TEMPS))
 	@echo "$$(CC1) <flags> -o $$@ $$<"
 	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1) $$(CFLAGS) -o - - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
 else
-	@$$(CPP) $$(CPPFLAGS) $$< -o $4.i
-	@$$(PREPROC) $4.i charmap.txt | $$(CC1) $$(CFLAGS) -o $4.s
-	@echo -e ".text\n\t.align\t2, 0\n" >> $4.s
-	$$(AS) $$(ASFLAGS) -o $$@ $4.s
+	@$$(CPP) $$(CPPFLAGS) $$< -o $3.i
+	@$$(PREPROC) $3.i charmap.txt | $$(CC1) $$(CFLAGS) -o $3.s
+	@echo -e ".text\n\t.align\t2, 0\n" >> $3.s
+	$$(AS) $$(ASFLAGS) -o $$@ $3.s
 endif
-$3.d: $2
-	$(SCANINC) -M $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2 > $3.d
-include $3.d
+$(call C_SCANINC,$1,$2)
 endef
-$(info Creating make rules for C files.)
-$(foreach src,$(C_SRCS),$(call C_DEP,$(OBJ_DIR),$(src)))
-$(foreach src,$(GFLIB_SRCS),$(call C_DEP,$(OBJ_DIR),$(src)))
+
+define C_SCANINC
+ifneq ($(NODEP),1)
+$1.o: $1.d
+$1.d: $2
+	$(SCANINC) -M $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2 > $1.d
+include $1.d
+endif
+endef
+
+# Create generic rules if no dependency scanning, else make specifics
+ifeq ($(NODEP),1)
+$(eval $(call C_DEP,$(C_BUILDDIR)/%,$(C_SUBDIR)/%.c))
+$(eval $(call C_DEP,$(GFLIB_BUILDDIR)/%,$(GFLIB_SUBDIR)/%.c))
+else
+$(foreach src,$(C_SRCS),$(eval $(call C_DEP,$(OBJ_DIR)/$(basename $(src)),$(src))))
+$(foreach src,$(GFLIB_SRCS),$(eval $(call C_DEP,$(OBJ_DIR)/$(basename $(src)),$(src))))
 endif
 
-# Assembly sources
-ifeq ($(NODEP),1)
-$(C_BUILDDIR)/%.o: $(C_SUBDIR)/%.s
-	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
-$(DATA_ASM_BUILDDIR)/%.o: $(DATA_ASM_SUBDIR)/%.s
-	$(PREPROC) $< charmap.txt | $(CPP) $(INCLUDE_FLAGS) - | $(AS) $(ASFLAGS) -o $@
-$(ASM_BUILDDIR)/%.o: $(ASM_SUBDIR)/%.s
-	$(AS) $(ASFLAGS) -o $@ $<
-else
-define SRC_ASM_DATA_DEP
-$1.o: $2
-	$$(PREPROC) $$< charmap.txt | $$(CPP) $(INCLUDE_FLAGS) - | $$(AS) $$(ASFLAGS) -o $$@
-$1.d: $2
-	$(SCANINC) -M $(INCLUDE_FLAGS) -I "" $2 > $1.d
-include $1.d
-endef
+# $1: Output path without extension, $2: Input file (`*.s`)
 define ASM_DEP
 $1.o: $2
 	$$(AS) $$(ASFLAGS) -o $$@ $$<
+$(call ASM_SCANINC,$1,$2)
+endef
+
+define ASM_DEP_PREPROC
+$1.o: $2
+	$$(PREPROC) $$< charmap.txt | $$(CPP) $(INCLUDE_FLAGS) - | $$(AS) $$(ASFLAGS) -o $$@
+$(call ASM_SCANINC,$1,$2)
+endef
+
+define ASM_SCANINC
+ifneq ($(NODEP),1)
+$1.o: $1.d
 $1.d: $2
 	$(SCANINC) -M $(INCLUDE_FLAGS) -I "" $2 > $1.d
 include $1.d
+endif
 endef
-$(info Creating make rules for ASM files.)
-$(foreach src, $(C_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(src:%.s=$(OBJ_DIR)/%),$(src))))
+
+# Assembly sources
+ifeq ($(NODEP),1)
+$(eval $(call ASM_DEP,$(ASM_BUILDDIR)/%,$(ASM_SUBDIR)/%.s))
+$(eval $(call ASM_DEP_PREPROC,$(C_BUILDDIR)/%,$(C_SUBDIR)/%.s))
+$(eval $(call ASM_DEP_PREPROC,$(DATA_ASM_BUILDDIR)/%,$(DATA_ASM_SUBDIR)/%.s))
+else
 $(foreach src, $(ASM_SRCS), $(eval $(call ASM_DEP,$(src:%.s=$(OBJ_DIR)/%),$(src))))
-$(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call SRC_ASM_DATA_DEP,$(src:%.s=$(OBJ_DIR)/%),$(src))))
+$(foreach src, $(C_ASM_SRCS), $(eval $(call ASM_DEP_PREPROC,$(src:%.s=$(OBJ_DIR)/%),$(src))))
+$(foreach src, $(REGULAR_DATA_ASM_SRCS), $(eval $(call ASM_DEP_PREPROC,$(src:%.s=$(OBJ_DIR)/%),$(src))))
 endif
 
 # Linker script generation
