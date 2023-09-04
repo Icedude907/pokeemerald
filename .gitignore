@@ -22,10 +22,7 @@ tools/agbcc
 !data/*.gba
 *.elf
 *.map
-*.o
 *.exe
-*.a
-*.i
 *.sym
 *.dump
 

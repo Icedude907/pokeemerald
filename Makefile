@@ -381,7 +381,7 @@ $(OBJ_DIR)/ld_script.ld: $(LD_SCRIPT) $(LD_SCRIPT_DEPS)
 libagbsyscall:
 	@$(MAKE) -C libagbsyscall TOOLCHAIN=$(TOOLCHAIN) MODERN=$(MODERN)
 
-$(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) libagbsyscall
+$(ELF): $(OBJ_DIR)/ld_script.ld $(OBJS) | libagbsyscall
 	@echo "cd $(OBJ_DIR) && $(LD) -Map ../../$(MAP) -T ld_script.ld -o ../../$@ <objects> <lib>"
 	@cd $(OBJ_DIR) && $(LD) -Map ../../$(MAP) -T ld_script.ld -o ../../$@ $(OBJS_REL) $(LIB)
 	$(GBAFIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
