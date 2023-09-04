@@ -25,6 +25,9 @@
 #include <set>
 #include <string>
 #include <iostream>
+#include <tuple>
+#include <fstream>
+#include <filesystem>
 #include "scaninc.h"
 #include "source_file.h"
 
@@ -45,10 +48,12 @@ int main(int argc, char **argv)
 {
     std::queue<std::string> filesToProcess;
     std::set<std::string> dependencies;
+    std::set<std::string> dependencies_includes;
 
     std::vector<std::string> includeDirs;
 
     bool makeformat = false;
+    std::filesystem::path make_outfile;
 
     argc--;
     argv++;
@@ -74,6 +79,9 @@ int main(int argc, char **argv)
         else if(arg.substr(0, 2) == "-M")
         {
             makeformat = true;
+            argc--;
+            argv++;
+            make_outfile = std::string(argv[0]);
         }
         else
         {
@@ -119,6 +127,7 @@ int main(int argc, char **argv)
             {
                 path = include;
             }
+            dependencies_includes.insert(path);
             bool inserted = dependencies.insert(path).second;
             if (inserted && exists)
             {
@@ -128,20 +137,35 @@ int main(int argc, char **argv)
         includeDirs.pop_back();
     }
 
-    if(makeformat)
-    {
-        std::printf("%s: ", initialPath.c_str());
-        for (const std::string &path : dependencies)
-        {
-            std::printf("%s ", path.c_str());
-        }
-    }
-    else
+    if(!makeformat)
     {
         for (const std::string &path : dependencies)
         {
             std::printf("%s\n", path.c_str());
         }
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
+    else
+    {
+        // Write out make rules to a file
+        std::ofstream output(make_outfile);
+
+        // Object rule
+        auto object_file = make_outfile;
+        object_file.replace_extension("o");
+        output << object_file.c_str() << ": ";
+        for (const std::string &path : dependencies)
+        {
+            output << path << " ";
+        }
+
+        // Dependency list rule
+        output << "\n" << make_outfile.c_str() << ": ";
+        for (const std::string &path : dependencies_includes)
+        {
+            output << path << " ";
+        }
+        output.flush();
+        output.close();
+    }
 }

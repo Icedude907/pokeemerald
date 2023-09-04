@@ -312,7 +312,7 @@ define C_SCANINC
 ifneq ($(NODEP),1)
 $1.o: $1.d
 $1.d: $2
-	$(SCANINC) -M $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2 > $1.d
+	$(SCANINC) -M $1.d $(INCLUDE_FLAGS) -I tools/agbcc/include -I gflib $2
 include $1.d
 endif
 endef
@@ -343,7 +343,7 @@ define ASM_SCANINC
 ifneq ($(NODEP),1)
 $1.o: $1.d
 $1.d: $2
-	$(SCANINC) -M $(INCLUDE_FLAGS) -I "" $2 > $1.d
+	$(SCANINC) -M $1.d $(INCLUDE_FLAGS) -I "" $2
 include $1.d
 endif
 endef
