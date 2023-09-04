@@ -291,7 +291,7 @@ endif
 
 # Args: $1 = Output file without extension (build/assets/src/data), $2 = Input file (src/data.c)
 define C_DEP
-$(call C_DEP_IMPL,$1,$2,$3)
+$(call C_DEP_IMPL,$1,$2,$1)
 endef
 # $1: Output file without extension, $2 input file, $3 temp path
 define C_DEP_IMPL
