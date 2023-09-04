@@ -259,7 +259,9 @@ include spritesheet_rules.mk
 include audio_rules.mk
 include assets.mk
 
-# Note, if you do not have Make 4.4, there's no guarantee this will work correctly when making in parallel. You may need to run `make tools` first.
+# Note, if you do not have Make 4.4, there's no guarantee this will work correctly when making in parallel.
+# You may need to run `make tools && make generated` using two invocations.
+.PHONY: .WAIT
 generated: tools .WAIT $(AUTO_GEN_TARGETS)
 clean-generated:
 	-rm -f $(AUTO_GEN_TARGETS)
