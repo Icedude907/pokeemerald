@@ -15,11 +15,19 @@ $(shell mkdir -p $(SPECIAL_OUTDIRS) )
 $(MID_BUILDDIR)/%.o: $(MID_ASM_DIR)/%.s
 	$(AS) $(ASFLAGS) -I sound -o $@ $<
 
-# Midi files *must* have an associated .cfg file, which is just command line arguments passed into `mid2agb`
-$(MID_ASM_DIR)/%.s: $(MID_SUBDIR)/%.mid $(MID_SUBDIR)/%.cfg
-	$(MID) $< $@ $(file < $(word 2,$^))
+# `midi.cfg` rule expansion
+MID_CFG_PATH := $(MID_SUBDIR)/$(notdir $(MID_SUBDIR)).cfg
+# $1: Source path no extension, $2 Options
+define MID_RULE
+$(MID_ASM_DIR)/$1.s: $(MID_SUBDIR)/$1.mid
+	$(MID) $$< $$@ $2
+endef
+define MID_EXPANSION
+	$(eval $(call MID_RULE,$(basename $(patsubst %:,%,$(word 1,$1))),$(wordlist 2,999,$1)))
+endef
+$(foreach line,$(shell cat $(MID_CFG_PATH) | sed "s/ /__SPACE__/g"),$(call MID_EXPANSION,$(subst __SPACE__, ,$(line))))
 
-# Warn users building without a .cfg - build will most likely fail later
+# Warn users building without a .cfg - build will fail at link time
 $(MID_ASM_DIR)/%.s: $(MID_SUBDIR)/%.mid
 	$(warning $< does not have an associated .cfg file! It cannot be built)
 
