@@ -25,6 +25,8 @@
 #include "trainer_hill.h"
 #include "constants/rgb.h"
 
+#include "hello.hpp"
+
 static void VBlankIntr(void);
 static void HBlankIntr(void);
 static void VCountIntr(void);
@@ -128,6 +130,7 @@ void AgbMain()
     AGBPrintfInit();
 #endif
 #endif
+    helloCpp();
     for (;;)
     {
         ReadKeys();

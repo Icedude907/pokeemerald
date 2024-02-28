@@ -121,21 +121,26 @@ CPPFLAGS := $(INCLUDE_CPP_ARGS) -iquote $(GFLIB_SUBDIR) -Wno-trigraphs -DMODERN=
 ifeq ($(MODERN),0)
   CPPFLAGS += -I tools/agbcc/include -I tools/agbcc -nostdinc -undef
   CC1 := tools/agbcc/bin/agbcc$(EXE)
+  CC1P := "FIXME"
   override CFLAGS += -mthumb-interwork -Wimplicit -Wparentheses -Werror -O$(O_LEVEL) -fhex-asm -g
   LIBPATH := -L ../../tools/agbcc/lib
   LIB := $(LIBPATH) -lgcc -lc -L../../libagbsyscall -lagbsyscall
 else
   # Note: The makefile must be set up to not call these if modern == 0
   MODERNCC := $(PREFIX)gcc
+  MODERNCXX := $(PREFIX)g++
   PATH_MODERNCC := PATH="$(PATH)" $(MODERNCC)
   CC1 := $(shell $(PATH_MODERNCC) --print-prog-name=cc1) -quiet
-  override CFLAGS += -mthumb -mthumb-interwork -O$(O_LEVEL) -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
+  CC1P := $(MODERNCXX)
+  override CFLAGS   += -std=gnu99 -O$(O_LEVEL) -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -Wno-pointer-to-int-cast
+  override CXXFLAGS += -std=c++23 -O$(O_LEVEL) -mthumb -mthumb-interwork -mabi=apcs-gnu -mtune=arm7tdmi -march=armv4t -fno-toplevel-reorder -fno-exceptions -fno-unwind-tables -fno-rtti -ffreestanding
   LIBPATH := -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libgcc.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libnosys.a))" -L "$(dir $(shell $(PATH_MODERNCC) -mthumb -print-file-name=libc.a))"
   LIB := $(LIBPATH) -lc -lnosys -lgcc -L../../libagbsyscall -lagbsyscall
 endif
 # Enable debug info if set
 ifeq ($(DINFO),1)
   override CFLAGS += -g
+  override CXXFLAGS += -g
 endif
 
 # Variable filled out in other make files
@@ -195,6 +200,10 @@ C_SRCS_IN := $(wildcard $(C_SUBDIR)/*.c $(C_SUBDIR)/*/*.c $(C_SUBDIR)/*/*/*.c)
 C_SRCS := $(foreach src,$(C_SRCS_IN),$(if $(findstring .inc.c,$(src)),,$(src)))
 C_OBJS := $(patsubst $(C_SUBDIR)/%.c,$(C_BUILDDIR)/%.o,$(C_SRCS))
 
+# C++
+CXX_SRCS := $(wildcard $(C_SUBDIR)/*.cpp $(C_SUBDIR)/*/*.cpp $(C_SUBDIR)/*/*/*.cpp)
+CXX_OBJS := $(patsubst $(C_SUBDIR)/%.cpp,$(C_BUILDDIR)/%.o,$(CXX_SRCS))
+
 GFLIB_SRCS := $(wildcard $(GFLIB_SUBDIR)/*.c)
 GFLIB_OBJS := $(patsubst $(GFLIB_SUBDIR)/%.c,$(GFLIB_BUILDDIR)/%.o,$(GFLIB_SRCS))
 
@@ -213,7 +222,7 @@ SONG_OBJS := $(patsubst $(SONG_SUBDIR)/%.s,$(SONG_BUILDDIR)/%.o,$(SONG_SRCS))
 MID_SRCS := $(wildcard $(MID_SUBDIR)/*.mid)
 MID_OBJS := $(patsubst $(MID_SUBDIR)/%.mid,$(MID_BUILDDIR)/%.o,$(MID_SRCS))
 
-OBJS     := $(C_OBJS) $(GFLIB_OBJS) $(C_ASM_OBJS) $(ASM_OBJS) $(DATA_ASM_OBJS) $(SONG_OBJS) $(MID_OBJS)
+OBJS     := $(C_OBJS) $(CXX_OBJS) $(GFLIB_OBJS) $(C_ASM_OBJS) $(ASM_OBJS) $(DATA_ASM_OBJS) $(SONG_OBJS) $(MID_OBJS)
 OBJS_REL := $(patsubst $(OBJ_DIR)/%,%,$(OBJS))
 
 SUBDIRS  := $(sort $(dir $(OBJS)))
@@ -299,6 +308,11 @@ endif
 define C_DEP
 $(call C_DEP_IMPL,$1,$2,$1)
 endef
+define CXX_DEP
+$(call CXX_DEP_IMPL,$1,$2,$1)
+endef
+
+# Builds C source files
 # Internal implementation details.
 # $1: Output file without extension, $2 input file, $3 temp path (if keeping)
 define C_DEP_IMPL
@@ -314,7 +328,16 @@ else
 endif
 $(call C_SCANINC,$1,$2)
 endef
-# Calls SCANINC to find dependencies
+
+# Builds C++ source files
+define CXX_DEP_IMPL
+$1.o: $2
+	@echo "$$(CC1P) <flags> -o $$@ $$<"
+	@$$(CPP) $$(CPPFLAGS) $$< | $$(PREPROC) $$< charmap.txt -i | $$(CC1P) $$(CXXFLAGS) -S -o - -x c++ - | cat - <(echo -e ".text\n\t.align\t2, 0") | $$(AS) $$(ASFLAGS) -o $$@ -
+$(call C_SCANINC,$1,$2)
+endef
+
+# Calls SCANINC to find dependencies of C/C++ source files.
 define C_SCANINC
 ifneq ($(NODEP),1)
 $1.o: $1.d
@@ -330,6 +353,7 @@ $(eval $(call C_DEP,$(C_BUILDDIR)/%,$(C_SUBDIR)/%.c))
 $(eval $(call C_DEP,$(GFLIB_BUILDDIR)/%,$(GFLIB_SUBDIR)/%.c))
 else
 $(foreach src,$(C_SRCS),$(eval $(call C_DEP,$(OBJ_DIR)/$(basename $(src)),$(src))))
+$(foreach src,$(CXX_SRCS),$(eval $(call CXX_DEP,$(OBJ_DIR)/$(basename $(src)),$(src))))
 $(foreach src,$(GFLIB_SRCS),$(eval $(call C_DEP,$(OBJ_DIR)/$(basename $(src)),$(src))))
 endif
 

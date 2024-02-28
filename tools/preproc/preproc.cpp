@@ -140,14 +140,15 @@ int main(int argc, char **argv)
 
     g_charmap = new Charmap(argv[2]);
 
-    char* extension = GetFileExtension(argv[1]);
+    char* extensionC = GetFileExtension(argv[1]);
+    std::string extension = extensionC;
 
-    if (!extension)
+    if (extension == "")
         FATAL_ERROR("\"%s\" has no file extension.\n", argv[1]);
-
-    if ((extension[0] == 's') && extension[1] == 0)
+    
+    if (extension == "s")
         PreprocAsmFile(argv[1]);
-    else if ((extension[0] == 'c' || extension[0] == 'i') && extension[1] == 0) {
+    else if (extension == "c" || extension == "cpp" || extension == "i") {
         if (argc == 4) {
             if (argv[3][0] == '-' && argv[3][1] == 'i' && argv[3][2] == '\0') {
                 PreprocCFile(argv[1], true);
@@ -158,7 +159,7 @@ int main(int argc, char **argv)
             PreprocCFile(argv[1], false);
         }
     } else
-        FATAL_ERROR("\"%s\" has an unknown file extension of \"%s\".\n", argv[1], extension);
+        FATAL_ERROR("\"%s\" has an unknown file extension of \"%s\".\n", argv[1], extension.c_str());
 
     return 0;
 }
